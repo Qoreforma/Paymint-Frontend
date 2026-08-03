@@ -1,0 +1,29 @@
+import { useEffect } from "react";
+import useDataPrintStore from "@/stores/useDataPrintStore";
+import SelectProvider from "./SelectProvider";
+import Checkout from "./Checkout";
+import Receipt from "./Receipt";
+
+const DataPrint = () => {
+    const { step, reset } = useDataPrintStore();
+
+    useEffect(() => {
+        reset();
+    }, [reset]);
+
+    const DataPrintSteps = [
+        { id: 1, component: SelectProvider },
+        { id: 2, component: Checkout },
+        { id: 3, component: Receipt },
+    ];
+
+    const CurrentComponent = DataPrintSteps[step - 1]?.component || DataPrintSteps[0].component;
+
+    return (
+        <div className="min-h-[80vh] flex md:items-center justify-center pt-5 md:pt-0">
+            <CurrentComponent />
+        </div>
+    );
+};
+
+export default DataPrint;

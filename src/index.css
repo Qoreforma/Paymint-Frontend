@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@font-face {
+  font-family: "Aeonik";
+  src: url("./assets/fonts/Aeonik-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "Aeonik";
+  src: url("./assets/fonts/Aeonik-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "Aeonik";
+  src: url("./assets/fonts/fonnts.com-Aeonik-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: bold;
+}
+
+/* ***** COLORS ********* */
+:root {
+  --brand: rgb(11, 69, 200);
+  --brand-ink: #0A1429;
+  --paper: #f8fafc;
+  --money-in: #1FAE6B;
+  --signal-red: #D7484D;
+  --gold: #E8B94A;
+  --slate: #6b7a99;
+  
+  --network-mtn: #FFCC08;
+  --network-airtel: #E4022A;
+  --network-glo: #00A651;
+  --network-9mobile: #00B04F;
+
+  --aqua: var(--brand);
+  --aqua-soft: rgba(11, 69, 200, 0.15);
+  --aqua-deep: rgb(8, 48, 140);
+  --ink: oklch(0.18 0.03 235);
+  --color-primary: var(--brand);
+}
+
+@theme {
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-paper: var(--paper);
+  --color-money-in: var(--money-in);
+  --color-signal-red: var(--signal-red);
+  --color-gold: var(--gold);
+  --color-slate: var(--slate);
+  --color-network-mtn: var(--network-mtn);
+  --color-network-airtel: var(--network-airtel);
+  --color-network-glo: var(--network-glo);
+  --color-network-9mobile: var(--network-9mobile);
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  --font-body: "Inter", sans-serif;
+  --font-general: "General Sans", sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--paper);
+  color: #101928;
+}
+
+/* Utilities for perforated edges and dot-leaders */
+.perforated-bottom {
+  position: relative;
+}
+.perforated-bottom::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background-image: radial-gradient(circle, var(--paper) 6px, transparent 6.5px);
+  background-size: 20px 12px;
+  background-position: center bottom;
+  z-index: 10;
+}
+
+.perforated-left {
+  position: relative;
+}
+.perforated-left::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -6px;
+  width: 12px;
+  background-image: radial-gradient(circle, var(--paper) 6px, transparent 6.5px);
+  background-size: 12px 20px;
+  background-position: left center;
+  z-index: 10;
+}
+
+.dot-leader {
+  flex-grow: 1;
+  border-bottom: 2px dotted #CBD5E1;
+  margin: 0 12px;
+  position: relative;
+  top: -6px;
+}
+
+/* ** SCROLLBAR STYLES ** */
+
+.scroll-bar-y::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scroll-bar-y::-webkit-scrollbar-thumb {
+  background-color: var(--aqua);
+  border-radius: 5px;
+}
+
+.scroll-bar-x::-webkit-scrollbar {
+  height: 2px;
+}
+
+.scroll-bar-x::-webkit-scrollbar-thumb {
+  background-color: var(--aqua);
+  border-radius: 5px;
+}
+
+.hide-scrollbar {
+  overflow: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Remove default date picker icon */
+
+/* For Chrome, Safari, Edge */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+/* For Firefox */
+input[type="date"] {
+  -moz-appearance: textfield;
+}
+
+/* Hide number input spinners in WebKit browsers */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide number input spinners in Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.container {
+  @apply max-w-[1180px] mx-auto pl-8 pr-11 max-md:px-7;
+}
