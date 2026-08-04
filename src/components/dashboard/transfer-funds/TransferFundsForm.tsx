@@ -1,5 +1,5 @@
 import CustomButton from "@/components/CustomButton";
-import { getWallet } from "@/lib/api/dashboard-apis/walletApis";
+import { getWallet, Wallet } from "@/lib/api/dashboard-apis/walletApis";
 import { formatAmount } from "@/lib/utils";
 import { TransferFundsSchema } from "@/lib/zodSchemas/dashboard.schema";
 import useTransferFunds from "@/stores/useTransferFundsStore";
@@ -7,9 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Wallet } from "../main-page/BalanceCard";
 import { Loader2 } from "lucide-react";
-
 
 type TFormData = z.infer<typeof TransferFundsSchema>
 

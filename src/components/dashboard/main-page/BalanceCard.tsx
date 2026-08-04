@@ -7,13 +7,11 @@ import {
   Check,
   Plus,
   Landmark,
-  ShieldCheck,
   ExternalLink,
   Info,
   Sparkles,
 } from "lucide-react";
 import { ImEyeBlocked, ImEye } from "react-icons/im";
-import { toast } from "sonner";
 
 import { getWallet } from "@/lib/api/dashboard-apis/walletApis";
 import { getStaticAccount } from "@/lib/api/dashboard-apis/staticAccountApis";

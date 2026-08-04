@@ -3,6 +3,15 @@ import api from "../axios";
 import { TWithdrawToBankPayload } from "@/components/dashboard/withdraw-funds/ConfirmFundsWithdrawal";
 import { TTransferFundsPayload } from "@/components/dashboard/transfer-funds/ConfirmFundsTransfer";
 
+export type Wallet = {
+  _id: string;
+  userId: string;
+  balance: number;
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export const getWallet = async () => {
     const res = await api.get(
         "/wallet"

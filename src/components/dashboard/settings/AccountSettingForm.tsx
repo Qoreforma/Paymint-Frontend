@@ -68,7 +68,6 @@ const AccountSettingForm = () => {
         mutationFn: updateProfile,
         onSuccess: (data) => {
             const userDetails = data?.userDetails;
-            console.log({userDetails})
             setAuthData(userDetails, accessToken!, refreshToken!)
             toast.success("Profile updated successfully!")
             navigate("/dashboard/settings")

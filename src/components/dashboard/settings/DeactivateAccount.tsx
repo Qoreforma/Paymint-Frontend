@@ -1,84 +1,92 @@
-import CustomButton from "@/components/CustomButton";
+import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import {
-    AlertDialog,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-  } from "@/components/ui/alert-dialog";
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/context/AuthContext";
 import { deactivateAccount } from "@/lib/api/authApi";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useState } from "react";
-import { HiOutlineChevronRight } from "react-icons/hi";
-import { IoClose } from "react-icons/io5";
 import { toast } from "sonner";
+import CustomButton from "@/components/CustomButton";
 
 const DeactivateAccount = () => {
-    const [openDialog, setOpenDialog] = useState(false);
-    const {clearAuthData} = useAuth()
+  const [openDialog, setOpenDialog] = useState(false);
+  const { clearAuthData } = useAuth();
 
-    const {mutate, isPending} = useMutation({
-        mutationFn: deactivateAccount,
-        onSuccess: () => {
-            toast.success("Account deactivated!")
-            setOpenDialog(false);
-            clearAuthData();
-        },
-        onError: (error: AxiosError) => {
-            console.log(error)
-            const errData = error.response?.data as { message?: string };
-                if(errData.message){
-                    return toast.error(errData.message)
-                }
-            toast.error("Something went wrong, please try again")
-        }
-    })
-
-    const handleProceed = () => {
-        mutate();
-    }
+  const { mutate, isPending } = useMutation({
+    mutationFn: deactivateAccount,
+    onSuccess: () => {
+      toast.success("Account deactivated.");
+      setOpenDialog(false);
+      clearAuthData();
+    },
+    onError: (error: AxiosError) => {
+      const errData = error.response?.data as { message?: string };
+      if (errData?.message) return toast.error(errData.message);
+      toast.error("Something went wrong, please try again");
+    },
+  });
 
   return (
-        <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
-            <AlertDialogTrigger asChild>
-                <button className="flex items-center justify-between cursor-pointer w-full group bg-white md:bg-transparent rounded-lg md:rounded-none max-md:p-2">
-                    <div className="flex items-center gap-4">
-                        <span className="size-10 md:size-12 grid place-items-center rounded-md md:rounded-full bg-[#FF00000A] text-[#FF0000]">
-                            <IoClose className="w-4 md:w-[22px] h-4 md:h-[18px]" />
-                        </span>
-                        <div className="">
-                            <h2 className="text-[#101928] font-medium md:font-bold text-left">Close account</h2>
-                            <p className="hidden md:block text-xs text-[#667185]">
-                                If you want to stop using PayMint
-                            </p>
-                        </div>
-                    </div>
+    <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+      <AlertDialogTrigger asChild>
+        <button className="flex items-center gap-4 px-5 py-4 w-full hover:bg-rose-50/50 transition-colors group cursor-pointer text-left">
+          <div className="size-10 rounded-xl border bg-rose-50 text-rose-500 border-rose-100 flex items-center justify-center shrink-0">
+            <Trash2 className="size-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="font-display font-semibold text-sm text-rose-600 block">
+              Close Account
+            </span>
+            <span className="text-xs text-slate-500">
+              Permanently delete your PayMint account
+            </span>
+          </div>
+          <div className="size-2 rounded-full bg-rose-400 shrink-0 opacity-70" />
+        </button>
+      </AlertDialogTrigger>
 
-                    <HiOutlineChevronRight className="hidden md:block size-5 text-[var(--aqua)]" />
-                </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="bg-white border-0 rounded-[20px] w-[95vw] !max-w-[430px] h-full !max-h-[387px] md:!max-h-[456px] !p-0 flex flex-col items-center justify-center">
-                <span className="size-10 md:size-16 grid place-items-center rounded-md md:rounded-full bg-[#FF00000A] text-[#FF0000]">
-                    <IoClose className="size-10" />
-                </span>
-                <div className="w-[90%] md:w-full max-w-[337px] mx-auto">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle className="text-center text-[#344054] text-2xl font-bold leading-7">Delete account?</AlertDialogTitle>
-                        <AlertDialogDescription className="text-center text-[var(--ink)] text-sm mt-3 mb-10">
-                            Once your account is closed and data is deleted, you will no longer have access to any PayMint service or information associated with your account. This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <div className="flex flex-col w-full gap-2">
-                        <CustomButton disabled={isPending}  onClick={() => setOpenDialog(false)}>No, Cancel</CustomButton>
-                        <CustomButton isLoading={isPending} disabled={isPending} className="text-[#FF0000] text-lg" variant="primary" onClick={handleProceed}>Yes, Delete</CustomButton>
-                    </div>
-                </div>
-            </AlertDialogContent>
-        </AlertDialog>
-  )
-}
+      <AlertDialogContent className="bg-white border-0 rounded-3xl w-[92vw] !max-w-[400px] !p-8">
+        <div className="flex flex-col items-center text-center">
+          <div className="size-16 rounded-3xl bg-rose-50 text-rose-500 flex items-center justify-center mb-5 border border-rose-100">
+            <Trash2 className="size-7" />
+          </div>
+          <AlertDialogHeader className="gap-0">
+            <AlertDialogTitle className="text-slate-900 text-xl font-bold text-center">
+              Delete account?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500 text-sm mt-2 text-center leading-relaxed">
+              Once your account is closed, all your data and payment history will be permanently deleted. You will lose access to all PayMint services. This action{" "}
+              <span className="font-semibold text-rose-600">cannot be undone</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex flex-col w-full gap-2.5 mt-6">
+            <CustomButton
+              disabled={isPending}
+              onClick={() => setOpenDialog(false)}
+              className="w-full"
+            >
+              Cancel
+            </CustomButton>
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => mutate()}
+              className="w-full h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm transition-colors cursor-pointer disabled:opacity-60 shadow-sm shadow-rose-200"
+            >
+              {isPending ? "Deleting account…" : "Yes, Delete My Account"}
+            </button>
+          </div>
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
-export default DeactivateAccount
+export default DeactivateAccount;
