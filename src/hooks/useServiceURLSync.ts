@@ -10,46 +10,62 @@ interface UseServiceURLSyncProps {
 export const useServiceURLSync = ({ step, updateStep, reset }: UseServiceURLSyncProps) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const hasInitialized = useRef(false);
+    const lastWrittenStep = useRef<number | null>(null);
+    const updateStepRef = useRef(updateStep);
+    const resetRef = useRef(reset);
 
+    // Keep callbacks fresh in ref to avoid triggering effects on new function instances
     useEffect(() => {
-        // On first mount, parse step from URL or reset if none exists
+        updateStepRef.current = updateStep;
+        resetRef.current = reset;
+    });
+
+    // 1. Initial Mount: sync URL to Store or reset (runs ONCE on mount)
+    useEffect(() => {
         if (!hasInitialized.current) {
             hasInitialized.current = true;
             const urlStep = searchParams.get("step");
             if (urlStep && !isNaN(Number(urlStep))) {
                 const parsedStep = Number(urlStep);
                 if (parsedStep !== step) {
-                    updateStep(parsedStep);
+                    updateStepRef.current(parsedStep);
                 }
+                lastWrittenStep.current = parsedStep;
             } else {
-                // Only reset if there's no step in the URL (first time entry)
-                reset();
-                // Set initial step in URL
+                resetRef.current();
+                lastWrittenStep.current = 1;
                 setSearchParams({ step: "1" }, { replace: true });
             }
         }
-    }, [searchParams, step, updateStep, reset, setSearchParams]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // When the state `step` changes internally, update the URL (if different)
+    // 2. Internal Store step change -> sync to URL (only when step actually changes)
     useEffect(() => {
         if (hasInitialized.current) {
             const urlStep = searchParams.get("step");
-            if (Number(urlStep) !== step) {
-                setSearchParams({ step: step.toString() });
+            const currentUrlStep = urlStep ? Number(urlStep) : 1;
+            if (currentUrlStep !== step && lastWrittenStep.current !== step) {
+                lastWrittenStep.current = step;
+                setSearchParams((prev) => {
+                    const newParams = new URLSearchParams(prev);
+                    newParams.set("step", step.toString());
+                    return newParams;
+                });
             }
         }
-    }, [step, searchParams, setSearchParams]);
+    }, [step]); // Only depend on store step
 
-    // Listen for browser back/forward buttons (URL changes)
+    // 3. Browser Back / Forward buttons -> sync URL back to store
     useEffect(() => {
         if (hasInitialized.current) {
             const urlStep = searchParams.get("step");
             if (urlStep && !isNaN(Number(urlStep))) {
                 const parsedStep = Number(urlStep);
-                if (parsedStep !== step) {
-                    updateStep(parsedStep);
+                if (parsedStep !== step && lastWrittenStep.current !== parsedStep) {
+                    lastWrittenStep.current = parsedStep;
+                    updateStepRef.current(parsedStep);
                 }
             }
         }
-    }, [searchParams, step, updateStep]);
+    }, [searchParams]); // Only depend on searchParams
 };

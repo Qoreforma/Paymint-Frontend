@@ -9,7 +9,7 @@ const AirtimePrint = () => {
 
     useEffect(() => {
         reset();
-    }, [reset]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const AirtimePrintSteps = [
         { id: 1, component: SelectProvider },

@@ -56,11 +56,12 @@ const RecipientDetails = () => {
         }
     })
 
+    const currentPhone = watch("phone");
     useEffect(() => {
-        if (user?.phone && !watch("phone")) {
+        if (user?.phone && !currentPhone) {
             setValue("phone", formatInitialPhone(user.phone), { shouldValidate: true });
         }
-    }, [user?.phone, setValue, watch]);
+    }, [user?.phone, setValue, currentPhone]);
 
     const { mutate, isPending: isVerifying, data: verifiedPhone, error: verifyError } = useMutation<phoneNoVerificationResponse, AxiosError, VerifyPhoneNoPayload>({
         mutationFn: verifyPhoneNumber,

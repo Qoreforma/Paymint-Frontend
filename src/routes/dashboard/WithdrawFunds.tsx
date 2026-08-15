@@ -25,11 +25,11 @@ const WithdrawFunds = () => {
             queryKey: ["bank-list"],
             queryFn: fetchBankList,
         });
-    }, [queryClient]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         reset();
-    }, [reset]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const { data: wallet, isLoading: fetchingWallet } = useQuery({
         queryKey: ["wallet-balance"],

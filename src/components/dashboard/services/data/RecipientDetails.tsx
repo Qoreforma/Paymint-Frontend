@@ -53,11 +53,12 @@ const RecipientDetails = () => {
         }
     })
 
+    const currentPhone = watch("phone");
     useEffect(() => {
-        if (user?.phone && !watch("phone")) {
+        if (user?.phone && !currentPhone) {
             setValue("phone", formatInitialPhone(user.phone), { shouldValidate: true });
         }
-    }, [user?.phone, setValue, watch]);
+    }, [user?.phone, setValue, currentPhone]);
 
     const { mutate, isPending: isVerifying, data: verifiedPhone, error: verifyError } = useMutation<phoneNoVerificationResponse, AxiosError, VerifyPhoneNoPayload>({
         mutationFn: verifyPhoneNumber,
@@ -120,17 +121,15 @@ const RecipientDetails = () => {
     }, [isSuccess, DataPlans, update]);
 
     const selectedPlan = useMemo(() => {
-        return dataPlans?.find((dataPlan) => dataPlan.id === plan) ?? null;
+        return dataPlans?.find((dataPlan) => (dataPlan.id || (dataPlan as any)._id) === plan) ?? null;
     }, [dataPlans, plan]);
 
     useEffect(() => {
         setProdAmount(selectedPlan?.amount)
         if (selectedPlan) {
-
-            // Need to set the purchase type based on the selected plan's dataType for the actual buy request
             update({ type: selectedPlan.dataType as "DIRECT" | "SME" });
         }
-    }, [selectedPlan, setValue, update])
+    }, [selectedPlan, setValue, update]);
 
     // Derive dynamic validities
     const validities = useMemo(() => {

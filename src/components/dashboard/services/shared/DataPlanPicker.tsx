@@ -36,17 +36,18 @@ const DataPlanPicker: React.FC<DataPlanPickerProps> = ({
             {!isLoading && !error && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[360px] overflow-y-auto pr-1 pb-1">
                     {plans?.map((plan, i) => {
-                        const isSelected = selectedPlanId === plan.id;
+                        const planId = (plan.id || (plan as any)._id || "").toString();
+                        const isSelected = Boolean(selectedPlanId) && Boolean(planId) && (selectedPlanId?.toString() === planId);
                         const isSme = plan.dataType === "SME";
 
                         return (
                             <motion.button
-                                key={plan.id}
+                                key={planId || i}
                                 type="button"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: Math.min(i * 0.05, 0.5) }}
-                                onClick={() => onSelect(isSelected ? "" : plan.id)}
+                                onClick={() => onSelect(isSelected ? "" : planId)}
                                 className={cn(
                                     "relative flex flex-col items-start p-3 rounded-xl border transition-all text-left group",
                                     isSelected 

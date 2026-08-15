@@ -22,11 +22,11 @@ const AddFunds = () => {
             queryKey: ["virtual-accounts-providers"],
             queryFn: fetchProviders,
         });
-    }, [queryClient]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         reset();
-    }, [reset]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const { data: wallet, isLoading: fetchingWallet } = useQuery({
         queryKey: ["wallet-balance"],

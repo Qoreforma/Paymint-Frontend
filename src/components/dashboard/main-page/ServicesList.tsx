@@ -14,7 +14,7 @@ const ServicesList = ({ onOpenAllServices }: { onOpenAllServices: () => void }) 
     queryClient.prefetchQuery({ queryKey: ["data-providers"], queryFn: fetchDataProviders });
     queryClient.prefetchQuery({ queryKey: ["electricity-providers"], queryFn: fetchElectricityProviders });
     queryClient.prefetchQuery({ queryKey: ["betting-providers"], queryFn: fetchBettingProviders });
-  }, [queryClient]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const featuredServices = appServices.filter(s => (s as any).featured);
 

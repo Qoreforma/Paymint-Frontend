@@ -9,7 +9,7 @@ const DataPrint = () => {
 
     useEffect(() => {
         reset();
-    }, [reset]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const DataPrintSteps = [
         { id: 1, component: SelectProvider },
