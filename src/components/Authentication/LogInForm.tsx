@@ -5,7 +5,6 @@ import CustomButton from "../CustomButton"
 import { logInFormSchema } from "@/lib/zodSchemas/auth.schema"
 import { z } from "zod"
 
-import AppleIcon from "@/assets/auth/google-icon.png";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5"
 import { useState } from "react"
 import { useMutation } from "@tanstack/react-query"
@@ -115,10 +114,6 @@ const LogInForm = () => {
 
             {/* SOCIAL LOG IN BUTTONS */}
             <GoogleLoginButton disabled={isLoggingIn} />
-            <CustomButton onClick={()=>{}} disabled={isLoggingIn} type="button" className="flex items-center justify-center gap-3 bg-black mt-4 text-white w-full">
-                <img src={AppleIcon} alt="google" className="size-6" /> 
-                <span>Log in with Apple</span>
-            </CustomButton>
         </form>
     </div>
   )
