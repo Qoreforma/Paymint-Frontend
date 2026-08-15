@@ -32,16 +32,21 @@ const getSocketUrl = (): string => {
 };
 
 export const useWalletSocket = () => {
-  const { accessToken, user } = useAuth();
+  const { accessToken } = useAuth();
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    if (!accessToken || !user) {
+    if (!accessToken) {
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
+      return;
+    }
+
+    // Prevent duplicate connections if socket is already initialized
+    if (socketRef.current) {
       return;
     }
 
@@ -50,23 +55,21 @@ export const useWalletSocket = () => {
       auth: { token: accessToken },
       transports: ["websocket", "polling"],
       reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 2000,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 3000,
     });
 
     socketRef.current = socket;
 
-    // 1. On Connect: Invalidate wallet query to ensure full sync
     socket.on("connect", () => {
       console.log("🟢 Real-time Wallet Socket connected:", socket.id);
-      queryClient.invalidateQueries({ queryKey: ["wallet-balance"] });
     });
 
-    // 2. Handle Real-Time Wallet Credit (Deposit, Refund, Admin Credit, Reversal, P2P Received)
+    // 1. Handle Real-Time Wallet Credit (Deposit, Refund, Admin Credit, Reversal, P2P Received)
     socket.on("wallet_credit", (payload: WalletBalanceEventPayload) => {
       console.log("💰 [Socket] Wallet Credited:", payload);
 
-      // Optimistically update React Query cache for wallet balance
+      // Optimistically update React Query cache for wallet balance without full re-fetch loop
       queryClient.setQueryData(["wallet-balance"], (oldData: any) => {
         if (!oldData) return oldData;
         return {
@@ -78,10 +81,8 @@ export const useWalletSocket = () => {
         };
       });
 
-      // Invalidate queries to refresh lists and guarantee consistency
-      queryClient.invalidateQueries({ queryKey: ["wallet-balance"] });
+      // Invalidate transaction history so list updates
       queryClient.invalidateQueries({ queryKey: ["txn-history"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
 
       const formattedAmount = Number(payload.amount).toLocaleString("en-US", {
         minimumFractionDigits: 2,
@@ -89,18 +90,16 @@ export const useWalletSocket = () => {
       });
 
       toast.success(`Wallet Credited: ₦${formattedAmount}`, {
-        description:
-          payload.reason ||
-          `Ref: ${payload.reference}`,
+        description: payload.reason || `Ref: ${payload.reference}`,
         duration: 6000,
       });
     });
 
-    // 3. Handle Real-Time Wallet Debit (Withdrawal, Bill Payment, P2P Sent, Admin Debit)
+    // 2. Handle Real-Time Wallet Debit (Withdrawal, Bill Payment, P2P Sent, Admin Debit)
     socket.on("wallet_debit", (payload: WalletBalanceEventPayload) => {
       console.log("💸 [Socket] Wallet Debited:", payload);
 
-      // Optimistically update React Query cache for wallet balance
+      // Optimistically update React Query cache for wallet balance without full re-fetch loop
       queryClient.setQueryData(["wallet-balance"], (oldData: any) => {
         if (!oldData) return oldData;
         return {
@@ -112,10 +111,8 @@ export const useWalletSocket = () => {
         };
       });
 
-      // Invalidate queries to refresh lists and guarantee consistency
-      queryClient.invalidateQueries({ queryKey: ["wallet-balance"] });
+      // Invalidate transaction history so list updates
       queryClient.invalidateQueries({ queryKey: ["txn-history"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
 
       const formattedAmount = Number(payload.amount).toLocaleString("en-US", {
         minimumFractionDigits: 2,
@@ -123,9 +120,7 @@ export const useWalletSocket = () => {
       });
 
       toast.info(`Wallet Debited: ₦${formattedAmount}`, {
-        description:
-          payload.reason ||
-          `Ref: ${payload.reference}`,
+        description: payload.reason || `Ref: ${payload.reference}`,
         duration: 5000,
       });
     });
@@ -142,7 +137,7 @@ export const useWalletSocket = () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [accessToken, user, queryClient]);
+  }, [accessToken, queryClient]);
 
   return socketRef.current;
 };
