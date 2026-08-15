@@ -8,10 +8,13 @@ import { useAuth } from "@/context/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { getServicesStatus } from "@/lib/api/dashboard-apis/generics";
 import { fetchAirtimeProviders, fetchDataProviders } from "@/lib/api/dashboard-apis/servicesApis";
+import { useWalletSocket } from "@/hooks/useWalletSocket";
 
 const DashboardLayout = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const {accessToken, loading, user} = useAuth();
+
+    useWalletSocket();
 
     if(loading) return null; 
     if(!accessToken || !user) return <Navigate to="/auth/login" replace />
