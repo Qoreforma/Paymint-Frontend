@@ -4,19 +4,50 @@ import { messaging } from "../lib/firebase";
 import { updateProfile } from "../lib/api/authApi";
 import { useAuth } from "../context/AuthContext";
 
+export const isNotificationSupported = (): boolean => {
+  return (
+    typeof window !== "undefined" &&
+    "Notification" in window &&
+    typeof Notification !== "undefined"
+  );
+};
+
+const getInitialNotificationPermission = (): NotificationPermission => {
+  if (isNotificationSupported()) {
+    try {
+      return Notification.permission;
+    } catch {
+      return "denied";
+    }
+  }
+  return "denied";
+};
+
 export const usePushNotifications = () => {
+  const [isSupported] = useState<boolean>(isNotificationSupported);
   const [permission, setPermission] = useState<NotificationPermission>(
-    Notification.permission
+    getInitialNotificationPermission
   );
   const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
-    setPermission(Notification.permission);
+    if (isNotificationSupported()) {
+      try {
+        setPermission(Notification.permission);
+      } catch {
+        setPermission("denied");
+      }
+    }
   }, []);
 
   const requestPermissionAndGetToken = async () => {
+    if (!isNotificationSupported()) {
+      console.warn("Notification API is not supported in this browser environment.");
+      return null;
+    }
+
     try {
       setLoading(true);
       const perm = await Notification.requestPermission();
@@ -56,5 +87,5 @@ export const usePushNotifications = () => {
     return null;
   };
 
-  return { permission, fcmToken, requestPermissionAndGetToken, loading };
+  return { isSupported, permission, fcmToken, requestPermissionAndGetToken, loading };
 };

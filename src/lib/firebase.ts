@@ -18,8 +18,12 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
 export let messaging: Messaging | null = null;
-isSupported().then((supported) => {
-  if (supported) {
-    messaging = getMessaging(app);
-  }
-});
+isSupported()
+  .then((supported) => {
+    if (supported) {
+      messaging = getMessaging(app);
+    }
+  })
+  .catch(() => {
+    messaging = null;
+  });

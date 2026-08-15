@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getDataEpinReceipt } from "@/lib/api/dashboard-apis/servicesApis";
 import SuccessIcon from "@/assets/dashboard/success_icon.svg";
 import CustomButton from "@/components/CustomButton";
+import { copyToClipboard } from "@/lib/utils";
 
 const Receipt = () => {
     const { txnResult, reset } = useDataPrintStore();
@@ -18,8 +19,8 @@ const Receipt = () => {
         enabled: !!txnResult?.reference
     });
 
-    const handleCopy = (pin: string) => {
-        navigator.clipboard.writeText(pin);
+    const handleCopy = async (pin: string) => {
+        await copyToClipboard(pin, "PIN copied to clipboard");
         setCopiedPin(pin);
         setTimeout(() => setCopiedPin(null), 2000);
     };

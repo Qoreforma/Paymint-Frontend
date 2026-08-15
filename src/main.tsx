@@ -6,16 +6,19 @@ import './index.css'
 import 'react-phone-input-2/lib/style.css'
 import App from './App.tsx'
 import { AuthContextProvider } from './context/AuthContext.tsx'
+import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
 const querClient = new QueryClient()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthContextProvider>
-      <QueryClientProvider client={querClient}>
-        <App />
-        <ReactQueryDevtools />
-      </QueryClientProvider>
-    </AuthContextProvider>
+    <ErrorBoundary>
+      <AuthContextProvider>
+        <QueryClientProvider client={querClient}>
+          <App />
+          <ReactQueryDevtools />
+        </QueryClientProvider>
+      </AuthContextProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

@@ -4,11 +4,13 @@ import { useAuth } from "../../context/AuthContext";
 import { Bell, X } from "lucide-react";
 
 export const NotificationPrompt = () => {
-  const { permission, requestPermissionAndGetToken, loading } = usePushNotifications();
+  const { isSupported, permission, requestPermissionAndGetToken, loading } = usePushNotifications();
   const { user } = useAuth();
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
+    if (!isSupported) return;
+
     // Only show if user is logged in, permission is strictly "default" (not asked yet),
     // and they haven't dismissed it this session.
     if (user && permission === "default" && !sessionStorage.getItem("pushPromptDismissed")) {
@@ -16,9 +18,9 @@ export const NotificationPrompt = () => {
       const timer = setTimeout(() => setShowPrompt(true), 3000);
       return () => clearTimeout(timer);
     }
-  }, [user, permission]);
+  }, [user, permission, isSupported]);
 
-  if (!showPrompt) return null;
+  if (!isSupported || !showPrompt) return null;
 
   const handleAllow = async () => {
     await requestPermissionAndGetToken();
