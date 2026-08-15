@@ -56,9 +56,13 @@ const RecipientDetails = () => {
     const currentPhone = watch("phone");
     useEffect(() => {
         if (user?.phone && !currentPhone) {
-            setValue("phone", formatInitialPhone(user.phone), { shouldValidate: true });
+            const formatted = formatInitialPhone(user.phone);
+            setValue("phone", formatted, { shouldValidate: true });
+            update({ phone: convertToLocalPhoneNumber(formatted) });
+        } else if (currentPhone) {
+            update({ phone: convertToLocalPhoneNumber(currentPhone) });
         }
-    }, [user?.phone, setValue, currentPhone]);
+    }, [user?.phone, setValue, currentPhone, update]);
 
     const { mutate, isPending: isVerifying, data: verifiedPhone, error: verifyError } = useMutation<phoneNoVerificationResponse, AxiosError, VerifyPhoneNoPayload>({
         mutationFn: verifyPhoneNumber,
@@ -99,7 +103,13 @@ const RecipientDetails = () => {
             // Find the provider that matches the detected network code
             const matchedProvider = providers.find(p => p.code.toLowerCase().includes(detectedNetwork));
             if (matchedProvider && matchedProvider.id !== providerId) {
-                update({ providerName: matchedProvider.code, providerId: matchedProvider.id, plan: "" });
+                update({
+                    provider: matchedProvider.code,
+                    providerName: matchedProvider.code,
+                    providerId: matchedProvider.id,
+                    plan: "",
+                    amount: ""
+                });
             }
         }
     }, [phoneNo, providers, update, providerId, isPorted]);
@@ -127,7 +137,12 @@ const RecipientDetails = () => {
     useEffect(() => {
         setProdAmount(selectedPlan?.amount)
         if (selectedPlan) {
-            update({ type: selectedPlan.dataType as "DIRECT" | "SME" });
+            update({
+                type: selectedPlan.dataType as "DIRECT" | "SME",
+                amount: selectedPlan.amount.toString(),
+            });
+        } else {
+            update({ amount: "" });
         }
     }, [selectedPlan, setValue, update]);
 
@@ -256,7 +271,7 @@ const RecipientDetails = () => {
                         providers={providers}
                         isLoading={isLoading}
                         selectedProviderCode={providerName}
-                        onSelect={(code, id) => update({ providerName: code, providerId: id, plan: "" })}
+                        onSelect={(code, id) => update({ provider: code, providerName: code, providerId: id, plan: "", amount: "" })}
                     />
                 </div>
 

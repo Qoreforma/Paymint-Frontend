@@ -42,7 +42,7 @@ const Data = () => {
         },
     ], [])
     
-    const {step, reset, update, provider, phone, amount} = useServiceFlowStore();
+    const {step, reset, update, provider, phone, amount, plan, dataPlans} = useServiceFlowStore();
 
     useServiceURLSync({ step, updateStep: (s) => update({ step: s }), reset });
 
@@ -57,9 +57,12 @@ const Data = () => {
     if (isLoading) return <Loader className="w-full h-full" />;
 
     if (statusMsg) return <EmptyState showBackBtn={true} text={statusMsg} />;
+    
+    const selectedPlan = dataPlans?.find((p: any) => (p.id || p._id) === plan);
     const summaryData = {
       "Service": "Data Subscription",
       "Network": provider ? provider.toUpperCase() : "-",
+      "Plan": selectedPlan?.name ? selectedPlan.name : "-",
       "Phone Number": phone ? phone : "-",
       "Amount": amount ? formatAmount(Number(amount)) : formatAmount(0),
       "Total": amount ? formatAmount(Number(amount)) : formatAmount(0)

@@ -57,11 +57,23 @@ const RecipientDetails = () => {
     })
 
     const currentPhone = watch("phone");
+    const currentAmount = watch("amount");
+
     useEffect(() => {
         if (user?.phone && !currentPhone) {
-            setValue("phone", formatInitialPhone(user.phone), { shouldValidate: true });
+            const formatted = formatInitialPhone(user.phone);
+            setValue("phone", formatted, { shouldValidate: true });
+            update({ phone: convertToLocalPhoneNumber(formatted) });
+        } else if (currentPhone) {
+            update({ phone: convertToLocalPhoneNumber(currentPhone) });
         }
-    }, [user?.phone, setValue, currentPhone]);
+    }, [user?.phone, setValue, currentPhone, update]);
+
+    useEffect(() => {
+        if (currentAmount !== undefined) {
+            update({ amount: currentAmount });
+        }
+    }, [currentAmount, update]);
 
     const { mutate, isPending: isVerifying, data: verifiedPhone, error: verifyError } = useMutation<phoneNoVerificationResponse, AxiosError, VerifyPhoneNoPayload>({
         mutationFn: verifyPhoneNumber,
