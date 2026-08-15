@@ -30,7 +30,7 @@ const DashboardLayout = () => {
             queryClient.prefetchQuery({ queryKey: ["airtime-providers"], queryFn: fetchAirtimeProviders });
             queryClient.prefetchQuery({ queryKey: ["data-providers"], queryFn: fetchDataProviders });
         }
-    }, [accessToken, queryClient]);
+    }, [accessToken]); // queryClient is stable - removed to prevent effect re-runs
 
     return (
         <div className="h-screen fixed left-1/2 -translate-x-1/2 overflow-y-hidden flex items-start w-full max-w-[1440px] mx-auto">

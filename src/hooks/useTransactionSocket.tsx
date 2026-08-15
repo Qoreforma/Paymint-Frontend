@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 const getSocketUrl = (): string => {
@@ -19,9 +19,24 @@ const getSocketUrl = (): string => {
 export const useTransactionSocket = (reference: string | null) => {
   const [status, setStatus] = useState<string | null>(null);
   const [transactionData, setTransactionData] = useState<any>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    if (!reference) return;
+    if (!reference) {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+      setStatus(null);
+      setTransactionData(null);
+      return;
+    }
+
+    // Disconnect previous socket instance if it exists
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
 
     const token = localStorage.getItem("accessToken");
     const socket: Socket = io(getSocketUrl(), {
@@ -29,6 +44,8 @@ export const useTransactionSocket = (reference: string | null) => {
       transports: ["websocket", "polling"],
       reconnectionAttempts: 5,
     });
+
+    socketRef.current = socket;
 
     socket.on("connect", () => {
       console.log(`Connected to transaction socket with ID: ${socket.id}`);
@@ -44,9 +61,12 @@ export const useTransactionSocket = (reference: string | null) => {
     });
 
     return () => {
-      socket.emit("unsubscribe:transaction", reference);
-      socket.off("transaction_update");
-      socket.disconnect();
+      if (socketRef.current) {
+        socketRef.current.emit("unsubscribe:transaction", reference);
+        socketRef.current.off("transaction_update");
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
     };
   }, [reference]);
 

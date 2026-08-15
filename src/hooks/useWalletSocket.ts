@@ -45,7 +45,7 @@ export const useWalletSocket = () => {
       return;
     }
 
-    // Prevent duplicate connections if socket is already initialized
+    // Prevent duplicate connections
     if (socketRef.current) {
       return;
     }
@@ -65,11 +65,11 @@ export const useWalletSocket = () => {
       console.log("🟢 Real-time Wallet Socket connected:", socket.id);
     });
 
-    // 1. Handle Real-Time Wallet Credit (Deposit, Refund, Admin Credit, Reversal, P2P Received)
+    let creditDebounceTimer: NodeJS.Timeout | null = null;
     socket.on("wallet_credit", (payload: WalletBalanceEventPayload) => {
       console.log("💰 [Socket] Wallet Credited:", payload);
 
-      // Optimistically update React Query cache for wallet balance without full re-fetch loop
+      // Update cache WITHOUT invalidating (prevents re-fetch cascade)
       queryClient.setQueryData(["wallet-balance"], (oldData: any) => {
         if (!oldData) return oldData;
         return {
@@ -81,8 +81,11 @@ export const useWalletSocket = () => {
         };
       });
 
-      // Invalidate transaction history so list updates
-      queryClient.invalidateQueries({ queryKey: ["txn-history"] });
+      // Only invalidate transaction history after a debounced delay
+      if (creditDebounceTimer) clearTimeout(creditDebounceTimer);
+      creditDebounceTimer = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["txn-history"] });
+      }, 500);
 
       const formattedAmount = Number(payload.amount).toLocaleString("en-US", {
         minimumFractionDigits: 2,
@@ -95,11 +98,11 @@ export const useWalletSocket = () => {
       });
     });
 
-    // 2. Handle Real-Time Wallet Debit (Withdrawal, Bill Payment, P2P Sent, Admin Debit)
+    let debitDebounceTimer: NodeJS.Timeout | null = null;
     socket.on("wallet_debit", (payload: WalletBalanceEventPayload) => {
       console.log("💸 [Socket] Wallet Debited:", payload);
 
-      // Optimistically update React Query cache for wallet balance without full re-fetch loop
+      // Update cache WITHOUT invalidating
       queryClient.setQueryData(["wallet-balance"], (oldData: any) => {
         if (!oldData) return oldData;
         return {
@@ -111,8 +114,11 @@ export const useWalletSocket = () => {
         };
       });
 
-      // Invalidate transaction history so list updates
-      queryClient.invalidateQueries({ queryKey: ["txn-history"] });
+      // Only invalidate transaction history after a debounced delay
+      if (debitDebounceTimer) clearTimeout(debitDebounceTimer);
+      debitDebounceTimer = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["txn-history"] });
+      }, 500);
 
       const formattedAmount = Number(payload.amount).toLocaleString("en-US", {
         minimumFractionDigits: 2,
@@ -130,6 +136,8 @@ export const useWalletSocket = () => {
     });
 
     return () => {
+      if (creditDebounceTimer) clearTimeout(creditDebounceTimer);
+      if (debitDebounceTimer) clearTimeout(debitDebounceTimer);
       socket.off("connect");
       socket.off("wallet_credit");
       socket.off("wallet_debit");
@@ -137,7 +145,7 @@ export const useWalletSocket = () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [accessToken, queryClient]);
+  }, [accessToken]); // queryClient removed from dependencies
 
   return socketRef.current;
 };
