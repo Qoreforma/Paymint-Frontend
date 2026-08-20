@@ -9,7 +9,8 @@ import EmptyState from "../../EmptyState";
 import useServiceFlowStore from "@/stores/useServiceFlowStore";
 import { useServiceURLSync } from "@/hooks/useServiceURLSync";
 import ServiceLayout from "../shared/ServiceLayout";
-import { formatAmount } from "@/lib/utils";
+import { formatAmount, convertToLocalPhoneNumber } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 
 const Data = () => {
@@ -58,6 +59,9 @@ const Data = () => {
 
     if (statusMsg) return <EmptyState showBackBtn={true} text={statusMsg} />;
     
+    const { user } = useAuth();
+    const displayPhone = phone || (user?.phone ? convertToLocalPhoneNumber(user.phone) : "-");
+
     const selectedPlan = dataPlans?.find((p: any) => 
         (p.id || p._id || "").toString() === (plan || "").toString()
     );
@@ -66,7 +70,7 @@ const Data = () => {
       "Service": "Data Subscription",
       "Network": provider ? provider.toUpperCase() : "-",
       "Plan": selectedPlan?.name ? selectedPlan.name : "-",
-      "Phone Number": phone ? phone : "-",
+      "Phone Number": displayPhone,
       "Amount": formatAmount(summaryAmount),
       "Total": formatAmount(summaryAmount)
     };

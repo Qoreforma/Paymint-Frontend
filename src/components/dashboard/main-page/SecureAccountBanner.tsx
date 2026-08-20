@@ -3,6 +3,7 @@ import { X, ChevronRight, Lock } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import shield3d from "@/assets/dashboard/shield-3d.png";
 
 const SecureAccountBanner = () => {
   const { user } = useAuth();
@@ -34,7 +35,7 @@ const SecureAccountBanner = () => {
         {/* 3D Shield Graphic */}
         <div className="absolute inset-0 flex items-center justify-center opacity-90 z-10 w-full h-full p-2">
           <img
-            src="/src/assets/dashboard/shield-3d.png"
+            src={shield3d}
             alt="Security Shield"
             className="w-full h-full object-contain mix-blend-screen drop-shadow-md"
           />

@@ -26,9 +26,9 @@ const RecipientDetails = () => {
     const [isFocused, setIsFocused] = useState(false);
     const [isPorted, setIsPorted] = useState(false);
     
-    // validity and dataType filter state
+    // validity and dataType filter state (Default to HOT)
     const [selectedValidity, setSelectedValidity] = useState<string>("All");
-    const [selectedDataType, setSelectedDataType] = useState<string>("All");
+    const [selectedDataType, setSelectedDataType] = useState<string>("HOT");
 
     const { user } = useAuth();
     const { update, step, providerName, providerId, plan, dataPlans, cashbackRule } = useServiceFlowStore();
@@ -55,6 +55,8 @@ const RecipientDetails = () => {
     })
 
     const currentPhone = watch("phone");
+
+    // Initialize and sync phone with store
     useEffect(() => {
         if (user?.phone && !currentPhone) {
             const formatted = formatInitialPhone(user.phone);
@@ -94,13 +96,13 @@ const RecipientDetails = () => {
 
     const phoneNo = watch("phone");
 
-    // Auto-detect network when phone number changes
+    // Auto-detect network & auto-fetch data plans whenever phone number or providers change
     useEffect(() => {
-        if (!phoneNo || !providers || isPorted) return;
+        const targetPhone = phoneNo || (user?.phone ? formatInitialPhone(user.phone) : "");
+        if (!targetPhone || !providers || isPorted) return;
         
-        const detectedNetwork = detectNigerianNetwork(phoneNo);
+        const detectedNetwork = detectNigerianNetwork(targetPhone);
         if (detectedNetwork) {
-            // Find the provider that matches the detected network code
             const matchedProvider = providers.find(p => 
                 p.code.toLowerCase().includes(detectedNetwork) || 
                 p.name.toLowerCase().includes(detectedNetwork)
@@ -110,26 +112,30 @@ const RecipientDetails = () => {
                     provider: matchedProvider.code,
                     providerName: matchedProvider.code,
                     providerId: matchedProvider.id,
+                    phone: convertToLocalPhoneNumber(targetPhone),
                     plan: "",
                     amount: "",
                     dataPlans: []
                 });
-                setSelectedDataType("All");
+                setSelectedDataType("HOT");
                 setSelectedValidity("All");
             }
         }
-    }, [phoneNo, providers, update, providerId, isPorted]);
+    }, [phoneNo, providers, user?.phone, update, providerId, isPorted]);
 
+    // Auto verify phone number with network
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
-            if (phoneNo && phoneNo.length >= 10 && providerName && !isPorted) {
-                mutate({ phone: convertToLocalPhoneNumber(phoneNo), network: providerName })
+            const targetPhone = phoneNo || (user?.phone ? formatInitialPhone(user.phone) : "");
+            if (targetPhone && targetPhone.length >= 10 && providerName && !isPorted) {
+                mutate({ phone: convertToLocalPhoneNumber(targetPhone), network: providerName });
             }
-        }, 1000);
+        }, 600);
 
         return () => clearTimeout(delayDebounce)
-    }, [phoneNo, mutate, providerName, isPorted])
+    }, [phoneNo, mutate, providerName, isPorted, user?.phone])
 
+    // Sync loaded plans into store
     useEffect(() => {
         if (DataPlans) {
             update({ dataPlans: DataPlans });
@@ -159,6 +165,13 @@ const RecipientDetails = () => {
         return DataPlans?.some(p => Boolean(p.isHot)) ?? false;
     }, [DataPlans]);
 
+    // If "HOT" selected but no hot plans exist for this provider, fallback gracefully to "All"
+    useEffect(() => {
+        if (DataPlans && DataPlans.length > 0 && selectedDataType === "HOT" && !hasHotPlans) {
+            setSelectedDataType("All");
+        }
+    }, [DataPlans, hasHotPlans, selectedDataType]);
+
     // Derive dynamic data types present in loaded plans
     const dataTypes = useMemo(() => {
         if (!DataPlans) return [];
@@ -183,7 +196,10 @@ const RecipientDetails = () => {
         let list = DataPlans;
 
         if (selectedDataType === "HOT") {
-            list = list.filter(p => Boolean(p.isHot));
+            const hotList = list.filter(p => Boolean(p.isHot));
+            if (hotList.length > 0) {
+                list = hotList;
+            }
         } else if (selectedDataType !== "All") {
             list = list.filter(p => {
                 const planType = (p.dataType || p.attributes?.dataType || "").toString().trim().toUpperCase();
@@ -198,6 +214,24 @@ const RecipientDetails = () => {
         return list;
     }, [DataPlans, selectedDataType, selectedValidity]);
 
+    // Helper for readable data type names
+    const formatTypeName = (type: string) => {
+        const upper = type.toUpperCase();
+        if (upper === "SME") return "SME";
+        if (upper === "DIRECT") return "Direct";
+        if (upper === "GIFTING") return "Gifting";
+        if (upper === "AWOOF DATA" || upper === "AWOOF") return "Awoof Data";
+        if (upper === "CORPORATE" || upper === "COOPERATE") return "Corporate";
+        return type.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    };
+
+    // Helper to count plans per filter
+    const getCount = (type: string) => {
+        if (!DataPlans) return 0;
+        if (type === "ALL") return DataPlans.length;
+        if (type === "HOT") return DataPlans.filter(p => Boolean(p.isHot)).length;
+        return DataPlans.filter(p => (p.dataType || p.attributes?.dataType || "").toString().trim().toUpperCase() === type).length;
+    };
 
     const onSubmit = (data: TFormData) => {
         if (!plan) {
@@ -311,7 +345,7 @@ const RecipientDetails = () => {
                         selectedProviderCode={providerName}
                         onSelect={(code, id) => {
                             update({ provider: code, providerName: code, providerId: id, plan: "", amount: "", dataPlans: [] });
-                            setSelectedDataType("All");
+                            setSelectedDataType("HOT");
                             setSelectedValidity("All");
                         }}
                     />
@@ -319,24 +353,32 @@ const RecipientDetails = () => {
 
                 {/* Plans section */}
                 {providerId && (
-                    <div className="w-full bg-white rounded-xl border border-slate-200 p-4 md:p-5 shadow-sm">
-                        <div className="flex flex-col gap-3 mb-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                <h3 className="text-sm text-[#344054] font-medium">Select a Data Plan</h3>
+                    <div className="w-full bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm">
+                        <div className="flex flex-col gap-4 mb-5">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-base font-semibold text-slate-800">Select a Data Plan</h3>
+                                    {DataPlans && DataPlans.length > 0 && (
+                                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                                            {DataPlans.length} available
+                                        </span>
+                                    )}
+                                </div>
                                 
-                                {/* Validity Sub-Filter */}
+                                {/* Compact Duration/Validity Filter */}
                                 {!fetchingPlans && !fetchPlansError && validities.length > 1 && (
-                                    <div className="flex flex-wrap items-center gap-1.5">
+                                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
+                                        <span className="text-xs font-medium text-slate-400 mr-1 hidden md:inline">Validity:</span>
                                         {validities.map((validity) => (
                                             <button
                                                 key={validity}
                                                 type="button"
                                                 onClick={() => setSelectedValidity(validity)}
                                                 className={cn(
-                                                    "px-2.5 py-1 text-xs font-medium rounded-lg transition-colors",
+                                                    "px-2.5 py-1 text-xs font-medium rounded-lg transition-all whitespace-nowrap",
                                                     selectedValidity === validity 
-                                                        ? "bg-[var(--brand-ink)] text-white" 
-                                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                                        ? "bg-slate-800 text-white shadow-xs" 
+                                                        : "bg-slate-100/90 text-slate-600 hover:bg-slate-200"
                                                 )}
                                             >
                                                 {validity}
@@ -346,52 +388,65 @@ const RecipientDetails = () => {
                                 )}
                             </div>
 
-                            {/* Data Type & Hot Filter Tabs */}
-                            {!fetchingPlans && !fetchPlansError && (dataTypes.length > 1 || hasHotPlans) && (
-                                <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedDataType("All")}
-                                        className={cn(
-                                            "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all",
-                                            selectedDataType === "All"
-                                                ? "bg-blue-600 text-white shadow-xs"
-                                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                        )}
-                                    >
-                                        All Plans
-                                    </button>
-
+                            {/* Clean Category & Data Type Tabs */}
+                            {!fetchingPlans && !fetchPlansError && (
+                                <div className="flex items-center gap-2 overflow-x-auto pb-1.5 hide-scrollbar">
                                     {hasHotPlans && (
                                         <button
                                             type="button"
                                             onClick={() => setSelectedDataType("HOT")}
                                             className={cn(
-                                                "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1",
+                                                "px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0",
                                                 selectedDataType === "HOT"
-                                                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-xs"
-                                                    : "bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200"
+                                                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm ring-2 ring-orange-400/30"
+                                                    : "bg-orange-50/80 text-orange-700 hover:bg-orange-100 border border-orange-200"
                                             )}
                                         >
-                                            🔥 Hot Deals
+                                            <span>🔥 Hot Deals</span>
+                                            <span className={cn("text-[10px] px-1.5 py-0.2 rounded-full", selectedDataType === "HOT" ? "bg-white/25 text-white" : "bg-orange-100 text-orange-800")}>
+                                                {getCount("HOT")}
+                                            </span>
                                         </button>
                                     )}
 
-                                    {dataTypes.map((type) => (
-                                        <button
-                                            key={type}
-                                            type="button"
-                                            onClick={() => setSelectedDataType(type)}
-                                            className={cn(
-                                                "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all uppercase tracking-wide",
-                                                selectedDataType === type
-                                                    ? "bg-blue-600 text-white shadow-xs"
-                                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                            )}
-                                        >
-                                            {type}
-                                        </button>
-                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedDataType("All")}
+                                        className={cn(
+                                            "px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0",
+                                            selectedDataType === "All"
+                                                ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-500/30"
+                                                : "bg-slate-100/90 text-slate-700 hover:bg-slate-200"
+                                        )}
+                                    >
+                                        <span>All Plans</span>
+                                        <span className={cn("text-[10px] px-1.5 py-0.2 rounded-full", selectedDataType === "All" ? "bg-white/25 text-white" : "bg-slate-200 text-slate-700")}>
+                                            {getCount("ALL")}
+                                        </span>
+                                    </button>
+
+                                    {dataTypes.map((type) => {
+                                        const count = getCount(type);
+                                        const isActive = selectedDataType === type;
+                                        return (
+                                            <button
+                                                key={type}
+                                                type="button"
+                                                onClick={() => setSelectedDataType(type)}
+                                                className={cn(
+                                                    "px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0",
+                                                    isActive
+                                                        ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-500/30"
+                                                        : "bg-slate-100/90 text-slate-700 hover:bg-slate-200"
+                                                )}
+                                            >
+                                                <span>{formatTypeName(type)}</span>
+                                                <span className={cn("text-[10px] px-1.5 py-0.2 rounded-full", isActive ? "bg-white/25 text-white" : "bg-slate-200 text-slate-700")}>
+                                                    {count}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>

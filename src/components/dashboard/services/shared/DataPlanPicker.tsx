@@ -58,16 +58,16 @@ const DataPlanPicker: React.FC<DataPlanPickerProps> = ({
                                 transition={{ delay: Math.min(i * 0.03, 0.4) }}
                                 onClick={() => onSelect(isSelected ? "" : planId)}
                                 className={cn(
-                                    "relative flex flex-col items-start p-3 rounded-xl border transition-all text-left group",
+                                    "relative flex flex-col items-start p-3.5 rounded-2xl border transition-all text-left group cursor-pointer",
                                     isSelected 
-                                        ? "border-[var(--brand-ink)] shadow-md bg-[var(--brand-ink)]/5 ring-1 ring-[var(--brand-ink)]" 
+                                        ? "border-blue-600 bg-blue-50/50 shadow-md ring-2 ring-blue-600/30" 
                                         : isHot
-                                        ? "border-orange-200 bg-orange-50/20 hover:border-orange-400 hover:shadow-sm"
-                                        : "border-slate-200 bg-white hover:border-[var(--brand-ink)]/50 hover:shadow-sm"
+                                        ? "border-amber-200/90 bg-amber-50/10 hover:border-blue-400 hover:shadow-sm"
+                                        : "border-slate-200 bg-white hover:border-blue-400 hover:shadow-sm"
                                 )}
                             >
                                 {isSelected && (
-                                    <div className="absolute top-2 right-2 size-5 bg-[var(--brand-ink)] rounded-full flex items-center justify-center text-white">
+                                    <div className="absolute top-2.5 right-2.5 size-5 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xs">
                                         <Check className="size-3 stroke-[3]" />
                                     </div>
                                 )}
@@ -95,7 +95,7 @@ const DataPlanPicker: React.FC<DataPlanPickerProps> = ({
                                 <span className="text-xs text-slate-500 mb-3">
                                     {plan.validity}
                                 </span>
-                                <span className="mt-auto font-mono text-sm font-bold text-[var(--brand-ink)]">
+                                <span className="mt-auto font-mono text-sm font-bold text-blue-700">
                                     {formatAmount(plan.amount)}
                                 </span>
                             </motion.button>

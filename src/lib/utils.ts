@@ -47,13 +47,19 @@ export function formatDateTime(dateString: string): string {
 }
 
 export function convertToLocalPhoneNumber(phone: string): string {
+  if (!phone) return "";
   const digits = phone.replace(/\D/g, '');
-  if (digits.startsWith("234")) {
+  if (digits.startsWith("234") && digits.length >= 12) {
     return "0" + digits.slice(3);
+  } else if (digits.length === 10 && !digits.startsWith("0")) {
+    return "0" + digits;
   } else if (digits.startsWith("0")) {
     return digits;
   }
-  // Fallback
+  // If user entered +234 followed by shorter string while typing
+  if (digits.startsWith("234")) {
+    return "0" + digits.slice(3);
+  }
   return digits;
 }
 

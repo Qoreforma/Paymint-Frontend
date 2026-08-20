@@ -1,4 +1,6 @@
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import trendDown from "@/assets/dashboard/trend-down.png";
+import trendUp from "@/assets/dashboard/trend-up.png";
 
 const DashboardStats = () => {
   return (
@@ -14,7 +16,7 @@ const DashboardStats = () => {
                     </p>
                     <div className="w-[90px] h-[40px]">
                        <img 
-                          src="/src/assets/dashboard/trend-down.png" 
+                          src={trendDown} 
                           alt="" 
                           className="w-full h-full object-contain object-right"
                         />
@@ -42,7 +44,7 @@ const DashboardStats = () => {
                     </p>
                     <div className="w-[90px] h-[40px]">
                        <img 
-                          src="/src/assets/dashboard/trend-up.png" 
+                          src={trendUp} 
                           alt="" 
                           className="w-full h-full object-contain object-right"
                         />

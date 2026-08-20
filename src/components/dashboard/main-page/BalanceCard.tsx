@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import wallet3d from "@/assets/dashboard/wallet-3d.png";
 
 const BalanceCard = () => {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const BalanceCard = () => {
         {/* 3D Wallet Graphic Vertically Centered on the Right */}
         <div className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 h-[125px] w-[135px] sm:h-[140px] sm:w-[150px] hidden sm:flex items-center justify-center pointer-events-none z-0">
           <img
-            src="/src/assets/dashboard/wallet-3d.png"
+            src={wallet3d}
             alt=""
             className="w-full h-full object-contain mix-blend-screen opacity-95 drop-shadow-2xl"
           />
