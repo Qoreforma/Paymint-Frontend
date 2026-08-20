@@ -44,7 +44,7 @@ const EnterPin = ({ isOpen = true, onClose, handleSubmit, value, onValueChange, 
     if (!user?.pinActivatedAt) {
         return (
             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose?.()}>
-                <DialogContent className="sm:max-w-md w-[90%] rounded-2xl mx-auto p-8 gap-0 border-0 outline-none">
+                <DialogContent className="sm:max-w-md w-[90%] rounded-2xl md:rounded-3xl mx-auto p-8 gap-0 bg-white border border-slate-100 shadow-2xl outline-none">
                     <DialogHeader className="mb-2">
                         <DialogTitle className="text-[var(--aqua)] font-medium text-2xl text-center">Set Transaction pin</DialogTitle>
                         <DialogDescription className="text-center">You need to set a transaction pin first.</DialogDescription>
@@ -63,7 +63,7 @@ const EnterPin = ({ isOpen = true, onClose, handleSubmit, value, onValueChange, 
                 onClose();
             }
         }}>
-            <DialogContent className="sm:max-w-md w-[90%] rounded-2xl mx-auto p-6 md:p-8 gap-0 border-0 outline-none">
+            <DialogContent className="sm:max-w-md w-[90%] rounded-2xl md:rounded-3xl mx-auto p-6 md:p-8 gap-0 bg-white border border-slate-100 shadow-2xl outline-none">
                 <DialogHeader className="mb-6">
                     <DialogTitle className="text-[var(--aqua)] font-medium text-2xl text-center">Confirm Payment</DialogTitle>
                     <DialogDescription className="text-center mt-2 text-[#717171] text-sm md:text-base">

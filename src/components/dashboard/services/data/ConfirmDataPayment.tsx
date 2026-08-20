@@ -15,10 +15,13 @@ const ConfirmDataPayment = () => {
     const [showPinForm, setShowPinForm] = useState(false);
   
     const isMobile = useIsMobile();
-    const {update, step, phone, type, plan, dataPlans, useCashback, cashbackRule} = useServiceFlowStore();
+    const {update, step, phone, type, plan, dataPlans, useCashback, cashbackRule, amount} = useServiceFlowStore();
 
-    const planName = dataPlans.find((dataPlan: any) => dataPlan.id === plan)?.name
-    const planAmount = dataPlans.find((dataPlan: any) => dataPlan.id === plan)?.amount
+    const selectedPlan = dataPlans?.find((dataPlan: any) => 
+        (dataPlan.id || dataPlan._id || "").toString() === (plan || "").toString()
+    );
+    const planName = selectedPlan?.name || "Data Plan";
+    const planAmount = selectedPlan?.amount !== undefined ? Number(selectedPlan.amount) : (amount ? Number(amount) : 0);
 
     const {mutate, isPending} = useMutation({
         mutationFn: buyData,

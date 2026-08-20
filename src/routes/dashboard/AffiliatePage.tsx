@@ -10,6 +10,8 @@ import { useQuery } from "@tanstack/react-query";
 import EmptyState from "@/components/dashboard/EmptyState";
 import Loader from "@/components/Loader";
 import { useAuth } from "@/context/AuthContext";
+import { SpinRewardBanner } from "@/components/dashboard/rewards/SpinRewardBanner";
+import { SpinHistorySection } from "@/components/dashboard/rewards/SpinHistorySection";
 
 const AffiliatePage = () => {
   const [copied, setCopied] = useState(false);
@@ -59,6 +61,9 @@ const AffiliatePage = () => {
 
         {uplineData && <UplineTable uplineData={uplineData} />}
 
+        {/* Spin & Win Rewards Available Banner */}
+        <SpinRewardBanner />
+
         <div className="flex flex-col gap-1.5 my-5 md:my-8">
             <h2 className="text-[#344054] text-lg">Referral code</h2>
             <div className="flex items-center justify-between bg-white rounded-lg py-2.5 px-3.5 border-[0.5px] border-[#D0D5DD]">
@@ -81,6 +86,9 @@ const AffiliatePage = () => {
         </div>
 
         <DownlinesTable referralData={data?.data} />
+
+        {/* Past Spin Rewards History */}
+        <SpinHistorySection />
     </div>
   )
 }

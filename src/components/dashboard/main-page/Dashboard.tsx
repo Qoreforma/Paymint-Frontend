@@ -4,7 +4,6 @@ import TransactionHistory from "./History"
 import SecureAccountBanner from "./SecureAccountBanner"
 import QuickActions from "./QuickActions"
 import ServicesList from "./ServicesList"
-import DashboardStats from "./DashboardStats"
 import { getTimeOfDay } from "@/lib/utils"
 import { useState } from "react"
 import AllServicesModal from "./AllServicesModal"
@@ -20,10 +19,10 @@ const Dashboard = () => {
             <p className="text-slate-500 text-sm mt-1">Here's what's happening with your account.</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative">
             
-            {/* Main Content Column (Left/Middle in design) */}
-            <div className="lg:col-span-7 xl:col-span-8 flex flex-col">
+            {/* Main Content Column (Left in design) */}
+            <div className="lg:col-span-7 xl:col-span-7 flex flex-col">
                 <div className="flex flex-col relative z-20">
                   <BalanceCard />
                   <QuickActions />
@@ -34,9 +33,8 @@ const Dashboard = () => {
             </div>
 
             {/* Side Column (Right in design) */}
-            <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-6 relative z-10">
+            <div className="lg:col-span-5 xl:col-span-5 flex flex-col relative z-10">
               <TransactionHistory />
-              <DashboardStats />
             </div>
 
         </div>

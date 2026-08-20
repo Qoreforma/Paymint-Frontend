@@ -63,17 +63,19 @@ export function detectNigerianNetwork(phone: string): string | null {
   // Return null if length isn't enough to determine or invalid
   if (localPhone.length < 4 || localPhone.length > 11) return null;
 
-  const prefix = localPhone.substring(0, 4);
+  const prefix4 = localPhone.substring(0, 4);
+  const prefix5 = localPhone.substring(0, 5);
 
-  const mtnPrefixes = ["0803", "0806", "0814", "0810", "0813", "0816", "0903", "0906", "0703", "0706", "0704"];
-  const gloPrefixes = ["0805", "0815", "0811", "0905", "0705"];
-  const airtelPrefixes = ["0802", "0808", "0812", "0902", "0907", "0901", "0708", "0701", "0912"];
+  const mtnPrefixes = ["0803", "0806", "0814", "0810", "0813", "0816", "0903", "0906", "0703", "0706", "0704", "0913", "0916"];
+  const mtnPrefixes5 = ["07025", "07026"];
+  const gloPrefixes = ["0805", "0807", "0815", "0811", "0905", "0705", "0915"];
+  const airtelPrefixes = ["0802", "0808", "0812", "0902", "0907", "0901", "0904", "0708", "0701", "0912", "0911"];
   const etisalatPrefixes = ["0809", "0817", "0818", "0909", "0908"];
 
-  if (mtnPrefixes.includes(prefix)) return "mtn";
-  if (gloPrefixes.includes(prefix)) return "glo";
-  if (airtelPrefixes.includes(prefix)) return "airtel";
-  if (etisalatPrefixes.includes(prefix)) return "9mobile";
+  if (mtnPrefixes.includes(prefix4) || mtnPrefixes5.includes(prefix5)) return "mtn";
+  if (gloPrefixes.includes(prefix4)) return "glo";
+  if (airtelPrefixes.includes(prefix4)) return "airtel";
+  if (etisalatPrefixes.includes(prefix4)) return "9mobile";
 
   return null;
 }

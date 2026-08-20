@@ -9,13 +9,20 @@ import { DataProviderType, TDataProduct } from "@/components/dashboard/services/
 
 export interface IDataPlan {
   id: string;
+  _id?: string;
   name: string;
   code: string;
   dataType: string;
   validity: string;
-  service: string;
+  service?: string;
   amount: number;
-  logo: string;
+  logo?: string;
+  isHot?: boolean;
+  attributes?: {
+    dataType?: string;
+    validityPeriod?: string;
+    [key: string]: any;
+  };
 }
 
 export type TDataServiceProvider = {
@@ -69,18 +76,62 @@ export const fetchAllDataPlans: QueryFunction<IDataPlan[], [_: string, providerI
   queryKey,
 }) => {
   const [, providerId] = queryKey;
-  
-  // Fetch both DIRECT and SME plans in parallel
-  const [directRes, smeRes] = await Promise.all([
-    api.get(`/data/${providerId}/DIRECT`).catch(() => ({ data: { data: [] } })),
-    api.get(`/data/${providerId}/SME`).catch(() => ({ data: { data: [] } }))
-  ]);
-  
-  const directPlans = Array.isArray(directRes.data?.data) ? directRes.data.data : [];
-  const smePlans = Array.isArray(smeRes.data?.data) ? smeRes.data.data : [];
-  
-  // Merge the lists
-  return [...directPlans, ...smePlans];
+  if (!providerId) return [];
+
+  try {
+    const res = await api.get(`/data/${providerId}/all`);
+    const rawPlans = Array.isArray(res.data?.data) ? res.data.data : [];
+    
+    return rawPlans.map((plan: any) => {
+      const planId = (plan.id || plan._id || "").toString();
+      const planDataType = (plan.attributes?.dataType || plan.dataType || "DIRECT").toString().toUpperCase();
+      const planValidity = plan.validity || plan.attributes?.validityPeriod || "30 Days";
+      
+      return {
+        ...plan,
+        id: planId,
+        _id: planId,
+        name: plan.name || "",
+        code: plan.code || "",
+        dataType: planDataType,
+        validity: planValidity,
+        amount: Number(plan.amount) || 0,
+        isHot: Boolean(plan.isHot),
+        logo: plan.logo || "",
+        attributes: plan.attributes || {},
+      };
+    });
+  } catch (error) {
+    console.error("Failed to fetch data plans with 'all' query:", error);
+    // Fallback: Try direct & sme in parallel if /all fails
+    const [directRes, smeRes] = await Promise.all([
+      api.get(`/data/${providerId}/DIRECT`).catch(() => ({ data: { data: [] } })),
+      api.get(`/data/${providerId}/SME`).catch(() => ({ data: { data: [] } }))
+    ]);
+    const directPlans = Array.isArray(directRes.data?.data) ? directRes.data.data : [];
+    const smePlans = Array.isArray(smeRes.data?.data) ? smeRes.data.data : [];
+    const merged = [...directPlans, ...smePlans];
+
+    return merged.map((plan: any) => {
+      const planId = (plan.id || plan._id || "").toString();
+      const planDataType = (plan.attributes?.dataType || plan.dataType || "DIRECT").toString().toUpperCase();
+      const planValidity = plan.validity || plan.attributes?.validityPeriod || "30 Days";
+      
+      return {
+        ...plan,
+        id: planId,
+        _id: planId,
+        name: plan.name || "",
+        code: plan.code || "",
+        dataType: planDataType,
+        validity: planValidity,
+        amount: Number(plan.amount) || 0,
+        isHot: Boolean(plan.isHot),
+        logo: plan.logo || "",
+        attributes: plan.attributes || {},
+      };
+    });
+  }
 };
 
 export const buyData = async (prop: {phone: string, productId: string, pin: string, type: "DIRECT" | "SME", useCashback?: boolean}) => {

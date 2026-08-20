@@ -26,8 +26,9 @@ const RecipientDetails = () => {
     const [isFocused, setIsFocused] = useState(false);
     const [isPorted, setIsPorted] = useState(false);
     
-    // validity filter state
+    // validity and dataType filter state
     const [selectedValidity, setSelectedValidity] = useState<string>("All");
+    const [selectedDataType, setSelectedDataType] = useState<string>("All");
 
     const { user } = useAuth();
     const { update, step, providerName, providerId, plan, dataPlans, cashbackRule } = useServiceFlowStore();
@@ -85,7 +86,6 @@ const RecipientDetails = () => {
         data: DataPlans,
         isLoading: fetchingPlans,
         error: fetchPlansError,
-        isSuccess
     } = useQuery<IDataPlan[], Error, IDataPlan[], [string, string]>({
         queryKey: ['data-plans', providerId as string],
         queryFn: fetchAllDataPlans,
@@ -101,15 +101,21 @@ const RecipientDetails = () => {
         const detectedNetwork = detectNigerianNetwork(phoneNo);
         if (detectedNetwork) {
             // Find the provider that matches the detected network code
-            const matchedProvider = providers.find(p => p.code.toLowerCase().includes(detectedNetwork));
+            const matchedProvider = providers.find(p => 
+                p.code.toLowerCase().includes(detectedNetwork) || 
+                p.name.toLowerCase().includes(detectedNetwork)
+            );
             if (matchedProvider && matchedProvider.id !== providerId) {
                 update({
                     provider: matchedProvider.code,
                     providerName: matchedProvider.code,
                     providerId: matchedProvider.id,
                     plan: "",
-                    amount: ""
+                    amount: "",
+                    dataPlans: []
                 });
+                setSelectedDataType("All");
+                setSelectedValidity("All");
             }
         }
     }, [phoneNo, providers, update, providerId, isPorted]);
@@ -125,26 +131,44 @@ const RecipientDetails = () => {
     }, [phoneNo, mutate, providerName, isPorted])
 
     useEffect(() => {
-        if (isSuccess && DataPlans) {
+        if (DataPlans) {
             update({ dataPlans: DataPlans });
         }
-    }, [isSuccess, DataPlans, update]);
+    }, [DataPlans, update]);
 
     const selectedPlan = useMemo(() => {
-        return dataPlans?.find((dataPlan) => (dataPlan.id || (dataPlan as any)._id) === plan) ?? null;
-    }, [dataPlans, plan]);
+        return (dataPlans || DataPlans)?.find((dataPlan: any) => 
+            (dataPlan.id || dataPlan._id || "").toString() === (plan || "").toString()
+        ) ?? null;
+    }, [dataPlans, DataPlans, plan]);
 
     useEffect(() => {
         setProdAmount(selectedPlan?.amount)
         if (selectedPlan) {
             update({
-                type: selectedPlan.dataType as "DIRECT" | "SME",
+                type: (selectedPlan.dataType || selectedPlan.attributes?.dataType || "DIRECT") as "DIRECT" | "SME",
                 amount: selectedPlan.amount.toString(),
             });
         } else {
             update({ amount: "" });
         }
-    }, [selectedPlan, setValue, update]);
+    }, [selectedPlan, update]);
+
+    // Check if hot plans exist
+    const hasHotPlans = useMemo(() => {
+        return DataPlans?.some(p => Boolean(p.isHot)) ?? false;
+    }, [DataPlans]);
+
+    // Derive dynamic data types present in loaded plans
+    const dataTypes = useMemo(() => {
+        if (!DataPlans) return [];
+        const typesSet = new Set<string>();
+        DataPlans.forEach(p => {
+            const rawType = (p.dataType || p.attributes?.dataType || "").toString().trim().toUpperCase();
+            if (rawType) typesSet.add(rawType);
+        });
+        return Array.from(typesSet);
+    }, [DataPlans]);
 
     // Derive dynamic validities
     const validities = useMemo(() => {
@@ -153,12 +177,26 @@ const RecipientDetails = () => {
         return ["All", ...uniqueValidities];
     }, [DataPlans]);
 
-    // Filter plans
+    // Filter plans by both data type and validity
     const filteredPlans = useMemo(() => {
         if (!DataPlans) return [];
-        if (selectedValidity === "All") return DataPlans;
-        return DataPlans.filter(p => p.validity === selectedValidity);
-    }, [DataPlans, selectedValidity]);
+        let list = DataPlans;
+
+        if (selectedDataType === "HOT") {
+            list = list.filter(p => Boolean(p.isHot));
+        } else if (selectedDataType !== "All") {
+            list = list.filter(p => {
+                const planType = (p.dataType || p.attributes?.dataType || "").toString().trim().toUpperCase();
+                return planType === selectedDataType;
+            });
+        }
+
+        if (selectedValidity !== "All") {
+            list = list.filter(p => p.validity === selectedValidity);
+        }
+
+        return list;
+    }, [DataPlans, selectedDataType, selectedValidity]);
 
 
     const onSubmit = (data: TFormData) => {
@@ -271,32 +309,87 @@ const RecipientDetails = () => {
                         providers={providers}
                         isLoading={isLoading}
                         selectedProviderCode={providerName}
-                        onSelect={(code, id) => update({ provider: code, providerName: code, providerId: id, plan: "", amount: "" })}
+                        onSelect={(code, id) => {
+                            update({ provider: code, providerName: code, providerId: id, plan: "", amount: "", dataPlans: [] });
+                            setSelectedDataType("All");
+                            setSelectedValidity("All");
+                        }}
                     />
                 </div>
 
                 {/* Plans section */}
                 {providerId && (
                     <div className="w-full bg-white rounded-xl border border-slate-200 p-4 md:p-5 shadow-sm">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
-                            <h3 className="text-sm text-[#344054] font-medium">Select a Data Plan</h3>
-                            
-                            {/* Validity Filter */}
-                            {!fetchingPlans && !fetchPlansError && validities.length > 1 && (
-                                <div className="flex flex-wrap items-center gap-2">
-                                    {validities.map((validity) => (
+                        <div className="flex flex-col gap-3 mb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <h3 className="text-sm text-[#344054] font-medium">Select a Data Plan</h3>
+                                
+                                {/* Validity Sub-Filter */}
+                                {!fetchingPlans && !fetchPlansError && validities.length > 1 && (
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        {validities.map((validity) => (
+                                            <button
+                                                key={validity}
+                                                type="button"
+                                                onClick={() => setSelectedValidity(validity)}
+                                                className={cn(
+                                                    "px-2.5 py-1 text-xs font-medium rounded-lg transition-colors",
+                                                    selectedValidity === validity 
+                                                        ? "bg-[var(--brand-ink)] text-white" 
+                                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                                )}
+                                            >
+                                                {validity}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Data Type & Hot Filter Tabs */}
+                            {!fetchingPlans && !fetchPlansError && (dataTypes.length > 1 || hasHotPlans) && (
+                                <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedDataType("All")}
+                                        className={cn(
+                                            "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all",
+                                            selectedDataType === "All"
+                                                ? "bg-blue-600 text-white shadow-xs"
+                                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        )}
+                                    >
+                                        All Plans
+                                    </button>
+
+                                    {hasHotPlans && (
                                         <button
-                                            key={validity}
                                             type="button"
-                                            onClick={() => setSelectedValidity(validity)}
+                                            onClick={() => setSelectedDataType("HOT")}
                                             className={cn(
-                                                "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
-                                                selectedValidity === validity 
-                                                    ? "bg-[var(--brand-ink)] text-white" 
+                                                "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1",
+                                                selectedDataType === "HOT"
+                                                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-xs"
+                                                    : "bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200"
+                                            )}
+                                        >
+                                            🔥 Hot Deals
+                                        </button>
+                                    )}
+
+                                    {dataTypes.map((type) => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setSelectedDataType(type)}
+                                            className={cn(
+                                                "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all uppercase tracking-wide",
+                                                selectedDataType === type
+                                                    ? "bg-blue-600 text-white shadow-xs"
                                                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                             )}
                                         >
-                                            {validity}
+                                            {type}
                                         </button>
                                     ))}
                                 </div>

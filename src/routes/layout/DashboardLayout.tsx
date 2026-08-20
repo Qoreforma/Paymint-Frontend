@@ -13,16 +13,9 @@ import { useWalletSocket } from "@/hooks/useWalletSocket";
 const DashboardLayout = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const {accessToken, loading, user} = useAuth();
+    const queryClient = useQueryClient();
 
     useWalletSocket();
-
-    if(loading) return null; 
-    if(!accessToken || !user) return <Navigate to="/auth/login" replace />
-
-    // const userDatailFilled = !!(user.username && user.gender && user.country && user.state);
-    // if(!userDatailFilled) return <Navigate to="/auth/user-details" replace />
-
-    const queryClient = useQueryClient();
 
     useEffect(() => {
         if (accessToken) {
@@ -32,14 +25,17 @@ const DashboardLayout = () => {
         }
     }, [accessToken]); // queryClient is stable - removed to prevent effect re-runs
 
+    if(loading) return null; 
+    if(!accessToken || !user) return <Navigate to="/auth/login" replace />
+
     return (
-        <div className="h-screen fixed left-1/2 -translate-x-1/2 overflow-y-hidden flex items-start w-full max-w-[1440px] mx-auto">
-            <div className="hidden md:block h-full">
+        <div className="h-screen w-full overflow-hidden flex items-start bg-[#F9FAFB]">
+            <div className="hidden md:block h-full shrink-0">
                 <Sidebar />
             </div>
-            <main className="h-full w-full">  
+            <main className="h-full w-full flex-1 flex flex-col min-w-0">  
                 <DashboardHeader />
-                <div ref={scrollRef} className="bg-[#F9FAFB] w-full h-full overflow-y-auto px-5 md:px-8 pt-5 pb-32">
+                <div ref={scrollRef} className="bg-[#F9FAFB] w-full flex-1 overflow-y-auto px-5 md:px-8 pt-5 pb-32">
                     <ScrollToTop containerRef={scrollRef}>
                         <Outlet />
                     </ScrollToTop>

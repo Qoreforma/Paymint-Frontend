@@ -131,6 +131,27 @@ export const useWalletSocket = () => {
       });
     });
 
+    socket.on(
+      "spin_ticket_ready",
+      (payload: { tierId: string; tierName: string; ticketId: string }) => {
+        console.log("🎉 [Socket] Spin Ticket Ready:", payload);
+
+        queryClient.invalidateQueries({ queryKey: ["spin-tickets"] });
+
+        toast.success("You've earned a spin! 🎉", {
+          description: payload.tierName
+            ? `Milestone: ${payload.tierName}`
+            : "Check your referrals to spin the wheel!",
+          duration: 6000,
+        });
+      }
+    );
+
+    socket.on("spin_result_resolved", (payload: any) => {
+      console.log("🎡 [Socket] Spin Result Resolved:", payload);
+      queryClient.invalidateQueries({ queryKey: ["spin-history"] });
+    });
+
     socket.on("connect_error", (error) => {
       console.warn("⚠️ Wallet Socket connection error:", error.message);
     });
@@ -141,6 +162,8 @@ export const useWalletSocket = () => {
       socket.off("connect");
       socket.off("wallet_credit");
       socket.off("wallet_debit");
+      socket.off("spin_ticket_ready");
+      socket.off("spin_result_resolved");
       socket.off("connect_error");
       socket.disconnect();
       socketRef.current = null;

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react"
 import UserImage from "@/assets/dashboard/userImage.png"
 import useBackButtonStore from "@/stores/useBackButtonStore";
 import BackButton from "@/components/Authentication/BackButton";
+import { SpinRewardBanner } from "../rewards/SpinRewardBanner";
+import { SpinHistorySection } from "../rewards/SpinHistorySection";
 
 const Referral = () => {
     const [copied, setCopied] = useState(false);
@@ -40,6 +42,10 @@ const Referral = () => {
             <h1 className="text-[var(--aqua)] font-medium text-2xl text-center">Referral</h1>
         </div>
         <p className="text-[#344054] md:text-[#717171] mt-2 md:text-center mb-6 md:mb-8 max-md:font-medium max-md:text-xl">Increase your earnings by referring more people!</p>
+        
+        {/* Spin & Win Rewards Available Banner */}
+        <SpinRewardBanner />
+
         <div className="flex flex-col gap-1.5">
             <h2 className="text-[#344054] max-md:text-sm">Referral link</h2>
             <div className="flex items-center justify-between bg-white rounded-lg py-2.5 px-3.5 border-[0.5px] border-[#D0D5DD]">
@@ -103,6 +109,9 @@ const Referral = () => {
                 }
             </div>
         </div>
+
+        {/* Past Spin Rewards History */}
+        <SpinHistorySection />
     </section>
   )
 }

@@ -11,35 +11,38 @@ const TransactionHistory = () => {
         isLoading: fetchingHistory,
     } = useQuery<TransactionHistoryResponse, Error>({
         queryKey: ["transaction-history"],
-        queryFn: () => getTxnHistory({per_page: 6}),
-    })
+        queryFn: () => getTxnHistory({ per_page: 7 }),
+    });
 
   return (
-    <section className="mt-7 w-full bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-            <h2 className="text-slate-800 font-display font-medium text-base">Recent Transactions</h2>
-            <Link className="flex items-center gap-1 text-blue-600 text-sm hover:underline" to="/dashboard/history">
-                <span className="font-medium">See all</span>
-                <ChevronRight className="size-4" strokeWidth={2.5} />
+    <section className="w-full bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-[0_2px_12px_rgba(16,24,40,0.03)]">
+        <div className="flex justify-between items-center mb-3">
+            <h2 className="text-[#101828] font-display font-bold text-base md:text-lg tracking-tight">Recent Transactions</h2>
+            <Link className="flex items-center gap-1 text-blue-600 text-sm font-semibold hover:underline" to="/dashboard/history">
+                <span>See all</span>
+                <ChevronRight className="size-4 stroke-[2.5]" />
             </Link>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col divide-y divide-slate-100">
           {
             fetchingHistory ? Array.from({length: 6}).map((_, i) => (
-              <div key={i} className="flex justify-between items-center animate-pulse py-2">
-                <div className="flex items-center gap-3">
-                  <div className="size-10 bg-slate-100 rounded-full"></div>
-                  <div className="flex flex-col">
-                    <div className="w-24 h-4 bg-slate-100 rounded mb-1"></div>
-                    <div className="w-16 h-3 bg-slate-100 rounded"></div>
+              <div key={i} className="flex justify-between items-center animate-pulse py-3 px-1">
+                <div className="flex items-center gap-3.5">
+                  <div className="size-11 bg-slate-100 rounded-full"></div>
+                  <div className="flex flex-col gap-1">
+                    <div className="w-28 h-4 bg-slate-100 rounded-md"></div>
+                    <div className="w-20 h-3 bg-slate-100 rounded-md"></div>
                   </div>
                 </div>
-                <div className="w-16 h-4 bg-slate-100 rounded"></div>
+                <div className="flex flex-col items-end gap-1">
+                  <div className="w-16 h-4 bg-slate-100 rounded-md"></div>
+                  <div className="w-12 h-3 bg-slate-100 rounded-md"></div>
+                </div>
               </div>
             )) : (
               txnHistoryData && txnHistoryData.data.length ? txnHistoryData.data.map((txn) => (
               <TransactionHistoryCard key={txn.id} transaction={txn} />
-            )) : <EmptyState className="h-[200px]" text="No transactions yet" />
+            )) : <EmptyState className="h-[220px]" text="No transactions yet" />
               )
           }
         </div>

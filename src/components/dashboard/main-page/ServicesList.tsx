@@ -20,13 +20,13 @@ const ServicesList = ({ onOpenAllServices }: { onOpenAllServices: () => void }) 
 
   return (
     <section className="mt-8 bg-transparent rounded-xl">
-        <div className="flex justify-between items-center px-2 md:px-0">
-          <h2 className="text-slate-800 font-display text-base md:text-lg font-semibold">Services</h2>
-          <button onClick={onOpenAllServices} className="text-blue-600 text-sm font-medium hover:underline">
+        <div className="flex justify-between items-center px-1 md:px-0">
+          <h2 className="text-slate-800 font-display text-base md:text-lg font-semibold">Explore PayMint</h2>
+          <button onClick={onOpenAllServices} className="text-blue-600 text-sm font-medium hover:underline cursor-pointer">
             See all
           </button>
         </div>
-        <div className="flex md:grid overflow-x-auto md:grid-cols-4 gap-4 mt-4 py-2 px-2 md:px-0 pb-4 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex overflow-x-auto gap-4 mt-4 py-2 px-1 pb-4 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {
               featuredServices.map(({id, label, icon: Icon, href, ...rest}, i) => {
                   const service = rest as any;
@@ -34,23 +34,25 @@ const ServicesList = ({ onOpenAllServices }: { onOpenAllServices: () => void }) 
                   <motion.div 
                     initial={{opacity: 0, y: 15}}
                     whileInView={{opacity: 100, y: 0}}
-                    whileHover={{y: -4, scale: 1.02}}
-                    transition={{delay: i*0.05, duration: .3 }}
+                    whileHover={{y: -3, scale: 1.01}}
+                    transition={{delay: i*0.04, duration: .3 }}
                     viewport={{once: true}}
                     key={id} 
-                    className="flex flex-col group cursor-pointer min-w-[150px] md:min-w-0 md:w-full snap-start"
+                    className="flex flex-col group cursor-pointer min-w-[170px] sm:min-w-[185px] md:min-w-[200px] shrink-0 snap-start"
                   >
                       <Link 
                         to={href} 
-                        className={`relative overflow-hidden flex flex-col items-center justify-center p-5 border ${service.borderColor || 'border-slate-200'} ${service.bgColor || 'bg-white'} rounded-2xl transition-all duration-300 hover:shadow-md h-[160px]`}
+                        className="relative overflow-hidden flex flex-col items-start justify-between p-4 sm:p-5 bg-white border border-slate-200/80 rounded-2xl transition-all duration-300 hover:shadow-md hover:border-blue-200 h-[155px] w-full"
                       >
-                          <div className={`w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-sm mb-4 border ${service.borderColor || 'border-slate-100'}`}>
-                             <img src={Icon as string} alt={label} className={`size-6 ${service.iconColor || ''}`} />
+                          <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105">
+                             <img src={Icon as string} alt={label} className="size-6 object-contain" />
                           </div>
-                          <p className="text-slate-800 font-display text-sm font-semibold tracking-tight text-center">{label}</p>
-                          <p className="text-slate-500 text-[11px] text-center leading-tight mt-1 px-1">
-                            {service.subtitle}
-                          </p>
+                          <div className="w-full text-left mt-3">
+                            <p className="text-slate-800 font-display text-sm font-semibold tracking-tight text-left truncate">{label}</p>
+                            <p className="text-slate-500 text-xs text-left leading-tight mt-1">
+                              {service.subtitle}
+                            </p>
+                          </div>
                       </Link>
                   </motion.div>
               )})

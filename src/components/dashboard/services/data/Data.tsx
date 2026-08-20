@@ -58,14 +58,17 @@ const Data = () => {
 
     if (statusMsg) return <EmptyState showBackBtn={true} text={statusMsg} />;
     
-    const selectedPlan = dataPlans?.find((p: any) => (p.id || p._id) === plan);
+    const selectedPlan = dataPlans?.find((p: any) => 
+        (p.id || p._id || "").toString() === (plan || "").toString()
+    );
+    const summaryAmount = selectedPlan?.amount !== undefined ? Number(selectedPlan.amount) : (amount ? Number(amount) : 0);
     const summaryData = {
       "Service": "Data Subscription",
       "Network": provider ? provider.toUpperCase() : "-",
       "Plan": selectedPlan?.name ? selectedPlan.name : "-",
       "Phone Number": phone ? phone : "-",
-      "Amount": amount ? formatAmount(Number(amount)) : formatAmount(0),
-      "Total": amount ? formatAmount(Number(amount)) : formatAmount(0)
+      "Amount": formatAmount(summaryAmount),
+      "Total": formatAmount(summaryAmount)
     };
           
     return (

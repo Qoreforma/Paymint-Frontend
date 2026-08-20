@@ -7,7 +7,6 @@ import {
   Check,
   Plus,
   Landmark,
-  ExternalLink,
   Info,
   Sparkles,
 } from "lucide-react";
@@ -79,12 +78,12 @@ const BalanceCard = () => {
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 rounded-full bg-blue-400/15 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-52 h-52 rounded-full bg-indigo-500/15 blur-2xl pointer-events-none" />
 
-        {/* 3D Wallet Graphic */}
-        <div className="absolute right-[-10px] bottom-[-20px] h-[130%] w-[40%] max-w-[180px] hidden sm:flex items-end justify-end pointer-events-none opacity-85 z-0">
+        {/* 3D Wallet Graphic Vertically Centered on the Right */}
+        <div className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 h-[125px] w-[135px] sm:h-[140px] sm:w-[150px] hidden sm:flex items-center justify-center pointer-events-none z-0">
           <img
             src="/src/assets/dashboard/wallet-3d.png"
             alt=""
-            className="w-full h-full object-contain object-bottom mix-blend-screen opacity-90 drop-shadow-2xl"
+            className="w-full h-full object-contain mix-blend-screen opacity-95 drop-shadow-2xl"
           />
         </div>
 
@@ -92,8 +91,8 @@ const BalanceCard = () => {
         <div className="relative z-10 w-full flex flex-col">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-widest font-bold text-blue-200/90">
-                AVAILABLE BALANCE
+              <span className="text-xs font-medium text-blue-100/90">
+                Available balance
               </span>
               <button
                 type="button"
@@ -128,65 +127,36 @@ const BalanceCard = () => {
           </div>
         </div>
 
-        {/* Bottom Section: Compact Low-Profile Funding Account Bar */}
-        <div className="relative z-10 w-full mt-4 pt-3 border-t border-white/15">
+        {/* Bottom Section: Left-aligned Compact Account Pill (No Divider Line) */}
+        <div className="relative z-10 w-full mt-3.5">
           {isAccountLoading ? (
             <div className="flex items-center gap-2 text-xs text-blue-200 py-0.5">
               <Loader2 className="size-3.5 animate-spin" />
               <span>Loading virtual account...</span>
             </div>
           ) : hasAccount ? (
-            /* COMPACT FUNDING ACCOUNT STRIP */
-            <div className="flex items-center justify-between w-full gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3 py-2 transition-all">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="size-6 rounded-lg bg-white/15 flex items-center justify-center text-blue-200 shrink-0">
-                  <Landmark className="size-3" />
-                </div>
-                <div className="flex items-center gap-2 truncate text-xs">
-                  <span className="font-semibold text-blue-100 uppercase tracking-wider shrink-0">
-                    {account?.bankName || "PAYMINT"}
-                  </span>
-                  <span className="text-blue-300/60">•</span>
-                  <span className="font-mono font-bold tracking-wider text-white truncate">
-                    {account?.accountNumber}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleCopyAccount}
-                  className="flex items-center gap-1 bg-white/15 hover:bg-white/25 text-white px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer"
-                  title="Copy Account Number"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="size-3 text-emerald-400" />
-                      <span className="text-emerald-300 font-semibold">Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="size-3 text-blue-200" />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsDetailsOpen(true)}
-                  className="flex items-center gap-1 text-blue-200 hover:text-white px-2 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer"
-                  title="View Full Account Details"
-                >
-                  <span>Details</span>
-                  <ExternalLink className="size-3" />
-                </button>
-              </div>
-            </div>
+            /* COMPACT LEFT-ALIGNED FUNDING ACCOUNT PILL */
+            <button
+              type="button"
+              onClick={handleCopyAccount}
+              className="flex items-center gap-2.5 bg-white/10 hover:bg-white/15 active:scale-[0.98] backdrop-blur-md border border-white/20 rounded-xl px-3.5 py-2 transition-all cursor-pointer text-white w-fit group"
+              title="Click to copy account number"
+            >
+              <Landmark className="size-4 text-blue-100 shrink-0" />
+              <span className="text-xs font-medium text-white tracking-wide">
+                <span className="capitalize">{account?.bankName?.toLowerCase() || "PalmPay"}</span>
+                <span className="text-blue-200/60 mx-1.5">•</span>
+                <span className="font-mono font-semibold tracking-wider">{account?.accountNumber}</span>
+              </span>
+              {copied ? (
+                <Check className="size-3.5 text-emerald-400 shrink-0 ml-1" />
+              ) : (
+                <Copy className="size-3.5 text-blue-200 group-hover:text-white transition-colors shrink-0 ml-1" />
+              )}
+            </button>
           ) : (
             /* NO ACCOUNT COMPACT STRIP */
-            <div className="flex items-center justify-between w-full gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3 py-1.5 transition-all">
+            <div className="flex items-center justify-between w-full max-w-xs gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3 py-1.5 transition-all">
               <div className="flex items-center gap-2 text-xs text-blue-100">
                 <Sparkles className="size-3.5 text-amber-300 shrink-0" />
                 <span className="truncate">No virtual bank account</span>
