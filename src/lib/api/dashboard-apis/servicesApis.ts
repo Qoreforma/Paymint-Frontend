@@ -135,8 +135,8 @@ export const fetchAllDataPlans: QueryFunction<IDataPlan[], [_: string, providerI
 };
 
 export const buyData = async (prop: {phone: string, productId: string, pin: string, type: "DIRECT" | "SME", useCashback?: boolean}) => {
-    const {phone, productId, pin, type, useCashback} = prop;
-    const payload = {phone, productId, pin, type, useCashback};
+    const {phone, productId, pin, useCashback} = prop;
+    const payload = {phone, productId, pin, useCashback};
 
     const res = await api.post(`/data`, payload)
     return res.data.data;
