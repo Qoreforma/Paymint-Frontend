@@ -4,6 +4,7 @@ import TransactionHistory from "./History"
 import SecureAccountBanner from "./SecureAccountBanner"
 import QuickActions from "./QuickActions"
 import ServicesList from "./ServicesList"
+import { SpinRewardBanner } from "../rewards/SpinRewardBanner"
 import { getTimeOfDay } from "@/lib/utils"
 import { useState } from "react"
 import AllServicesModal from "./AllServicesModal"
@@ -25,6 +26,7 @@ const Dashboard = () => {
             <div className="lg:col-span-7 xl:col-span-7 flex flex-col">
                 <div className="flex flex-col relative z-20">
                   <BalanceCard />
+                  <SpinRewardBanner />
                   <QuickActions />
                 </div>
                 
