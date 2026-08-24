@@ -281,8 +281,9 @@ export const getDataEpinReceipt = async (reference: string) => {
     const res = await api.get(`/data/epin/${reference}`);
     return res.data.data;
 }
+
 // Airtime To Cash
-export const getAirtimeCashBuybackRates = async () => {
+export const getAirtimeCashBuybackRates = async (): Promise<{rates: Record<string, number>, notes: string, notesActive: boolean}> => {
     const res = await api.get("/airtime/cash/buyback-rates");
     return res.data.data;
 }

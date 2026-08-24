@@ -49,6 +49,11 @@ export const transferFunds = async (payload: TTransferFundsPayload) => {
     return res.data.data;
 }
 
+export const verifyInternalBeneficiary = async (identifier: string) => {
+    const res = await api.post("/wallet/beneficiaries/verify", { identifier });
+    return res.data.data;
+}
+
 // export const getTxnHistory = async (): Promise<Transaction[]> => {
 //     const res = await api.get("/wallet/transactions?page=1&per_page=10")
 //     return res.data.data;

@@ -4,27 +4,44 @@ import { create } from "zustand";
 
 type TWithdrawFunds = {
     step: number;
-    selectedBank: TBank | null,
-    bank_account: string,
-    accountName: string,
-    amount: string,
-    note: string,
-    save: boolean,
+    withdrawalType: "bank" | "internal";
+    
+    // Bank Transfer Fields
+    selectedBank: TBank | null;
+    bank_account: string;
+    accountName: string;
+    
+    // Internal Transfer Fields
+    beneficiary: string;
+    beneficiaryName: string;
+    
+    // Shared Fields
+    amount: string;
+    note: string;
+    save: boolean;
+    showConfirmModal: boolean;
 
-    txnResult: TWithdrawToBankResponse | null,
+    txnResult: TWithdrawToBankResponse | null;
     
     update: (fields: Partial<Omit<TWithdrawFunds, "update">>) => void;
     reset: () => void;
 }
 
-const initialState = {
+const initialState: Omit<TWithdrawFunds, "update" | "reset"> = {
     step: 1,
+    withdrawalType: "bank",
+    
     selectedBank: null,
     bank_account: "",
     accountName: "",
-    amount: "10",
+    
+    beneficiary: "",
+    beneficiaryName: "",
+    
+    amount: "",
     note: "",
     save: false,
+    showConfirmModal: false,
 
     txnResult: null
 }

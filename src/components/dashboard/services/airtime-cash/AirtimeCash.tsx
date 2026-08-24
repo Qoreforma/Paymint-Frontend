@@ -29,7 +29,10 @@ const AirtimeCash = () => {
   useServiceURLSync({ step, updateStep: (s) => update({ step: s }), reset });
 
   const CurrentComponent = AirtimePurchaseSteps[step - 1]?.component || AirtimePurchaseSteps[0].component;
-  const statusMsg = servicesStatus?.airtime.status !== "active" ? servicesStatus?.airtime.message : null;
+  const airtimeCashStatus = servicesStatus?.airtime_cash;
+  const statusMsg = airtimeCashStatus && airtimeCashStatus.status !== "active"
+    ? (airtimeCashStatus.message || "Airtime to Cash is currently unavailable. Please try again later.")
+    : null;
 
   if (isLoading) return <Loader className="w-full h-full" />;
   if (statusMsg) return <EmptyState showBackBtn={true} text={statusMsg} />;

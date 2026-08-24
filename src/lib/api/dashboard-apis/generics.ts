@@ -14,6 +14,7 @@ export interface ServiceInfo {
 export interface ServicesData {
   data: ServiceInfo;
   airtime: ServiceInfo;
+  airtime_cash: ServiceInfo;
   cable_tv: ServiceInfo;
   electricity: ServiceInfo;
   education: ServiceInfo;

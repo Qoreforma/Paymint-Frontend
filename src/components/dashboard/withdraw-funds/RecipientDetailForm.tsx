@@ -6,22 +6,15 @@ import { BsCheck2Circle } from "react-icons/bs";
 import { motion } from "framer-motion";
 import { z } from "zod";
 import { 
-  Building2, 
   Check, 
   ChevronDown, 
   ChevronRight, 
-  CreditCard, 
   Loader2, 
-  Lock, 
-  ShieldCheck, 
-  UserCheck, 
   ArrowRight,
-  Sparkles
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { toast } from "sonner";
 
 import Card from "@/assets/dashboard/Card.svg";
@@ -41,16 +34,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-
 import CustomButton from "@/components/CustomButton";
 import { fetchBankList, withdrawToBank } from "@/lib/api/dashboard-apis/walletApis";
 import { cn } from "@/lib/utils";
@@ -59,7 +42,6 @@ import { addBankAccount, getSavedAccounts, verifyBankAccount } from "@/lib/api/d
 import { TSavedBankAccount } from "../settings/BankInfo";
 import { twMerge } from "tailwind-merge";
 import { useAuth } from "@/context/AuthContext";
-import { TWithdrawToBankResponse } from "./ConfirmFundsWithdrawal";
 
 export type TBank = {
     routingKey: string;
@@ -76,9 +58,7 @@ type TFormData = z.infer<typeof RecipientDetailFormSchema>;
 const RecipientDetailForm = () => {
     const { user } = useAuth();
     const [checked, setChecked] = useState(false);
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showBanksDropdown, setShowBanksDropdown] = useState(false);
-    const [pin, setPin] = useState("");
 
     const { update, amount, selectedBank, bank_account, accountName } = useWithdrawFundsStore();
 
@@ -102,24 +82,6 @@ const RecipientDetailForm = () => {
 
     const { mutate: addAccount } = useMutation({
         mutationFn: addBankAccount,
-    });
-
-    const { mutate: withdrawMutate, isPending: isWithdrawing } = useMutation<TWithdrawToBankResponse, AxiosError, { bankCode: string; accountNumber: string; accountName: string; amount: string; pin: string }>({
-        mutationFn: withdrawToBank,
-        onSuccess: (data) => {
-            setShowConfirmModal(false);
-            update({ step: 2, txnResult: data });
-        },
-        onError: (error: AxiosError) => {
-            setShowConfirmModal(false);
-            update({ step: 2, txnResult: null });
-            const errData = error.response?.data as { message?: string };
-            if (errData.message) {
-                toast.error(errData.message);
-            } else {
-                toast.error("Withdrawal failed. Please try again.");
-            }
-        }
     });
 
     const {
@@ -157,26 +119,7 @@ const RecipientDetailForm = () => {
             accountName: accName,
             amount: data.amount,
             save: checked,
-        });
-        setPin("");
-        setShowConfirmModal(true);
-    };
-
-    const handleConfirmWithdrawal = () => {
-        if (!selectedBank || !accountNumber || !amountVal || pin.length < 4) return;
-
-        const accName = verifiedAccount?.accountName || accountName || "";
-
-        if (checked && accName) {
-            addAccount({ accountName: accName, accountNumber, bankCode: selectedBank.bankCode });
-        }
-
-        withdrawMutate({
-            bankCode: selectedBank.bankCode,
-            accountNumber,
-            accountName: accName,
-            amount: amountVal,
-            pin,
+            showConfirmModal: true,
         });
     };
 
@@ -361,184 +304,6 @@ const RecipientDetailForm = () => {
                     </>
                 ) : null}
             </form>
-
-            {/* Premium Fintech Confirmation Modal */}
-            <Dialog open={showConfirmModal} onOpenChange={(open) => !isWithdrawing && setShowConfirmModal(open)}>
-                <DialogContent className="sm:max-w-md md:max-w-lg w-[94%] max-h-[92vh] overflow-y-auto rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-2xl bg-white backdrop-blur-md">
-                    {!user?.pinActivatedAt ? (
-                        <div className="py-4">
-                            <div className="size-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto mb-4">
-                                <Lock className="size-7" />
-                            </div>
-                            <DialogHeader className="mb-4 text-center">
-                                <DialogTitle className="text-xl font-bold text-slate-900 text-center">Set Transaction PIN</DialogTitle>
-                                <DialogDescription className="text-center text-slate-500 mt-1">
-                                    You need to set a transaction PIN first before withdrawing funds.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <CustomButton variant="primary" href="/dashboard/settings/security" className="w-full mt-4 text-center">
-                                Go to Security Settings
-                            </CustomButton>
-                        </div>
-                    ) : (
-                        <div>
-                            {/* Modal Header Badge */}
-                            <div className="size-14 rounded-2xl bg-gradient-to-br from-blue-500/10 to-blue-600/20 text-blue-600 border border-blue-500/20 shadow-inner flex items-center justify-center mx-auto mb-4">
-                                <ShieldCheck className="size-7" />
-                            </div>
-
-                            <DialogHeader className="text-center">
-                                <DialogTitle className="text-2xl font-display font-semibold text-slate-900 text-center">
-                                    Confirm Withdrawal
-                                </DialogTitle>
-                                <DialogDescription className="text-center text-slate-500 text-sm mt-1">
-                                    Please review your transfer details and authorize with your PIN
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            {/* Premium Transaction Summary Card */}
-                            <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 my-6 space-y-4 shadow-xs">
-                                {/* Hero Amount Box */}
-                                <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-2xs flex flex-col items-center justify-center text-center">
-                                    <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase mb-1">
-                                        Withdrawal Amount
-                                    </span>
-                                    <span className="text-3xl font-extrabold text-blue-600 font-display flex items-baseline gap-1">
-                                        ₦{Number(amountVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </span>
-                                </div>
-
-                                {/* Detailed Rows */}
-                                <div className="space-y-3 pt-1 text-sm">
-                                    {/* Recipient Name */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-slate-500">
-                                            <div className="size-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                                                <UserCheck className="size-4" />
-                                            </div>
-                                            <span>Recipient</span>
-                                        </div>
-                                        <span className="font-semibold text-slate-800 truncate max-w-[200px]">
-                                            {verifiedAccount?.accountName || accountName || "N/A"}
-                                        </span>
-                                    </div>
-
-                                    {/* Bank Name */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-slate-500">
-                                            <div className="size-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                                <Building2 className="size-4" />
-                                            </div>
-                                            <span>Bank Name</span>
-                                        </div>
-                                        <span className="font-semibold text-slate-800">
-                                            {selectedBank?.name}
-                                        </span>
-                                    </div>
-
-                                    {/* Account Number */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-slate-500">
-                                            <div className="size-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                                                <CreditCard className="size-4" />
-                                            </div>
-                                            <span>Account Number</span>
-                                        </div>
-                                        <span className="font-mono font-semibold text-slate-800 tracking-wider">
-                                            {accountNumber}
-                                        </span>
-                                    </div>
-
-                                    {/* Processing Fee */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-slate-500">
-                                            <div className="size-7 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
-                                                <Sparkles className="size-4" />
-                                            </div>
-                                            <span>Processing Fee</span>
-                                        </div>
-                                        <span className="inline-flex items-center bg-green-50 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-green-200/60">
-                                            Free
-                                        </span>
-                                    </div>
-
-                                    <div className="border-t border-slate-200/70 pt-3 flex items-center justify-between font-semibold">
-                                        <span className="text-slate-700">Total Debit</span>
-                                        <span className="text-slate-900 text-base font-bold">
-                                            ₦{Number(amountVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* PIN Entry Section */}
-                            <div className="w-full flex flex-col items-center">
-                                <div className="flex items-center gap-1.5 mb-1.5">
-                                    <Lock className="size-4 text-slate-600" />
-                                    <p className="text-sm font-semibold text-slate-800">Authorization PIN</p>
-                                </div>
-                                <p className="text-xs text-slate-500 text-center mb-4">
-                                    Enter your 4-digit transaction PIN to authorize this withdrawal
-                                </p>
-                                
-                                <InputOTP
-                                    pattern={REGEXP_ONLY_DIGITS}
-                                    maxLength={4}
-                                    value={pin}
-                                    onChange={(v) => setPin(v)}
-                                    disabled={isWithdrawing}
-                                    autoFocus
-                                >
-                                    <InputOTPGroup className="flex w-full justify-center gap-3 md:gap-4">
-                                        {Array.from({ length: 4 }).map((_, index) => (
-                                            <InputOTPSlot
-                                                key={index}
-                                                className="border-2 border-slate-200 rounded-2xl size-14 md:size-16 text-2xl text-slate-800 font-bold bg-white shadow-xs transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/15"
-                                                index={index}
-                                            />
-                                        ))}
-                                    </InputOTPGroup>
-                                </InputOTP>
-
-                                {/* Security Reassurance Pill */}
-                                <div className="bg-emerald-50/70 border border-emerald-200/60 text-emerald-800 rounded-xl py-2.5 px-4 flex items-center justify-center gap-2 text-xs font-medium w-full mt-6 mb-2 shadow-2xs">
-                                    <ShieldCheck className="size-4 text-emerald-600 shrink-0" />
-                                    <span>Protected with 256-bit bank-grade encryption</span>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <button
-                                    type="button"
-                                    onClick={handleConfirmWithdrawal}
-                                    disabled={pin.length < 4 || isWithdrawing}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white h-14 rounded-xl font-semibold text-base transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed shadow-lg shadow-blue-600/25 active:scale-[0.99] cursor-pointer"
-                                >
-                                    {isWithdrawing ? (
-                                        <>
-                                            <Loader2 className="animate-spin size-5" />
-                                            Processing Withdrawal...
-                                        </>
-                                    ) : (
-                                        <>
-                                            Confirm & Withdraw
-                                            <ArrowRight className="size-5" />
-                                        </>
-                                    )}
-                                </button>
-
-                                <button
-                                    type="button"
-                                    disabled={isWithdrawing}
-                                    onClick={() => setShowConfirmModal(false)}
-                                    className="w-full text-slate-500 hover:text-slate-700 hover:bg-slate-100/70 h-10 rounded-xl text-sm font-medium transition-colors mt-2 cursor-pointer"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
         </>
     );
 };

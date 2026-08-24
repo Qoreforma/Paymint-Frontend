@@ -93,11 +93,14 @@ const RecipientDetails = () => {
     })
 
     const {
-        data: buybackRates,
-    } = useQuery<Record<string, number>, Error>({
+        data: buybackRatesData,
+    } = useQuery<{rates: Record<string, number>, notes: string, notesActive: boolean}, Error>({
         queryKey: ["airtime-cash-rates"],
         queryFn: getAirtimeCashBuybackRates,
     })
+    const buybackRates = buybackRatesData?.rates;
+    const adminNotes = buybackRatesData?.notes;
+    const notesActive = buybackRatesData?.notesActive;
 
     const { mutate: requestOtp, isPending: isRequestingOtp } = useMutation({
         mutationFn: requestAirtimeCashOtp,
@@ -153,7 +156,7 @@ const RecipientDetails = () => {
     return (
         <section className="w-full">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
+            <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
                 <div className="size-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
                    <svg className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -164,6 +167,25 @@ const RecipientDetails = () => {
                     <p className="text-slate-500 text-sm mt-0.5">Enter details to convert airtime to cash</p>
                 </div>
             </div>
+
+            {/* Admin Notes / Instructions */}
+            {notesActive && adminNotes && (
+                <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 p-4 rounded-2xl border border-amber-200 bg-amber-50 flex gap-3"
+                >
+                    <div className="shrink-0 mt-0.5">
+                        <svg className="size-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p className="text-sm font-semibold text-amber-800 mb-1">How it works</p>
+                        <p className="text-sm text-amber-700 leading-relaxed whitespace-pre-line">{adminNotes}</p>
+                    </div>
+                </motion.div>
+            )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
                 
