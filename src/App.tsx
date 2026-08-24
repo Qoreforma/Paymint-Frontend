@@ -53,6 +53,7 @@ import InternationalAirtime from "./components/dashboard/services/international-
 import InternationalData from "./components/dashboard/services/international-data/InternationalData";
 import AirtimePrint from "./components/dashboard/services/airtime-print/AirtimePrint";
 import DataPrint from "./components/dashboard/services/data-print/DataPrint";
+import AirtimeCash from "./components/dashboard/services/airtime-cash/AirtimeCash";
 
 function App() {
   const router = createBrowserRouter([
@@ -134,6 +135,10 @@ function App() {
         {
           path: "services/airtime",
           element: <Airtime />
+        },
+        {
+          path: "services/airtime-cash",
+          element: <AirtimeCash />
         },
         {
           path: "services/data",

@@ -434,6 +434,18 @@ export const appServices = [
         bgColor: "bg-cyan-50/50",
         borderColor: "border-cyan-100",
     },
+    {
+        id: 17,
+        label: "Airtime to Cash",
+        subtitle: "Convert airtime to cash",
+        icon: Rss,
+        href: "/dashboard/services/airtime-cash",
+        category: "Telecom",
+        featured: false,
+        iconColor: "text-blue-600",
+        bgColor: "bg-blue-50/50",
+        borderColor: "border-blue-100",
+    },
     // {
     //     id: 13,
     //     label: "Intl Airtime",

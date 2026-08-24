@@ -16,7 +16,7 @@ export const SpinRewardBanner: React.FC = () => {
     staleTime: 30000,
   });
 
-  if (isLoading || !tickets || tickets.length === 0) {
+  if ((isLoading || !tickets || tickets.length === 0) && !isModalOpen) {
     return null;
   }
 

@@ -281,3 +281,23 @@ export const getDataEpinReceipt = async (reference: string) => {
     const res = await api.get(`/data/epin/${reference}`);
     return res.data.data;
 }
+// Airtime To Cash
+export const getAirtimeCashBuybackRates = async () => {
+    const res = await api.get("/airtime/cash/buyback-rates");
+    return res.data.data;
+}
+
+export const requestAirtimeCashOtp = async (payload: { phone: string, network: string }) => {
+    const res = await api.post("/airtime/cash/request-otp", payload);
+    return res.data.data;
+}
+
+export const verifyAirtimeCashOtp = async (payload: { phone: string, network: string, otp: string }) => {
+    const res = await api.post("/airtime/cash/verify-otp", payload);
+    return res.data.data;
+}
+
+export const finalizeAirtimeCash = async (payload: { phone: string, network: string, amount: string, sharePin: string, pin: string }) => {
+    const res = await api.post("/airtime/cash/finalize", payload);
+    return res.data.data;
+}
