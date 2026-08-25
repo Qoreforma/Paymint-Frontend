@@ -94,8 +94,8 @@ const RecipientDetails = () => {
 
     const {
         data: buybackRatesData,
-    } = useQuery<{rates: Record<string, number>, notes: string, notesActive: boolean}, Error>({
-        queryKey: ["airtime-cash-rates"],
+    } = useQuery({
+        queryKey: ["airtime-cash-rates", provider],
         queryFn: getAirtimeCashBuybackRates,
     })
     const buybackRates = buybackRatesData?.rates;
