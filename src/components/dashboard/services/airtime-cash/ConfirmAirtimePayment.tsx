@@ -21,8 +21,8 @@ const ConfirmAirtimePayment = () => {
 
   const {
       data: buybackRatesResponse,
-  } = useQuery<{ rates: Record<string, number>; notes: string; notesActive: boolean }, Error>({
-      queryKey: ["airtime-cash-rates"],
+  } = useQuery({
+      queryKey: ["airtime-cash-rates"] as [string, string?],
       queryFn: getAirtimeCashBuybackRates,
   })
 

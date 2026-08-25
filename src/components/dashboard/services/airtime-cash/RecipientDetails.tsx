@@ -95,7 +95,7 @@ const RecipientDetails = () => {
     const {
         data: buybackRatesData,
     } = useQuery({
-        queryKey: ["airtime-cash-rates", provider],
+        queryKey: ["airtime-cash-rates", provider] as [string, string?],
         queryFn: getAirtimeCashBuybackRates,
     })
     const buybackRates = buybackRatesData?.rates;
