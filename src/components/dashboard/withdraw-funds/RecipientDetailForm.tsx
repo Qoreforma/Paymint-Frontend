@@ -15,7 +15,6 @@ import {
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { toast } from "sonner";
 
 import Card from "@/assets/dashboard/Card.svg";
 
@@ -35,13 +34,12 @@ import {
 } from "@/components/ui/popover";
 
 import CustomButton from "@/components/CustomButton";
-import { fetchBankList, withdrawToBank } from "@/lib/api/dashboard-apis/walletApis";
+import { fetchBankList } from "@/lib/api/dashboard-apis/walletApis";
 import { cn } from "@/lib/utils";
 import { TAccountVerResponse, verifyBankAccountPayload } from "../settings/AddNewBank";
-import { addBankAccount, getSavedAccounts, verifyBankAccount } from "@/lib/api/dashboard-apis/settingsApis";
+import { getSavedAccounts, verifyBankAccount } from "@/lib/api/dashboard-apis/settingsApis";
 import { TSavedBankAccount } from "../settings/BankInfo";
 import { twMerge } from "tailwind-merge";
-import { useAuth } from "@/context/AuthContext";
 
 export type TBank = {
     routingKey: string;
@@ -56,7 +54,6 @@ export type TBank = {
 type TFormData = z.infer<typeof RecipientDetailFormSchema>;
 
 const RecipientDetailForm = () => {
-    const { user } = useAuth();
     const [checked, setChecked] = useState(false);
     const [showBanksDropdown, setShowBanksDropdown] = useState(false);
 
@@ -78,10 +75,6 @@ const RecipientDetailForm = () => {
     } = useQuery<TBank[], Error>({
         queryKey: ["bank-list"],
         queryFn: fetchBankList,
-    });
-
-    const { mutate: addAccount } = useMutation({
-        mutationFn: addBankAccount,
     });
 
     const {

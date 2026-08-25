@@ -20,11 +20,13 @@ const ConfirmAirtimePayment = () => {
   const {update, step, phone, amount, provider} = useServiceFlowStore();
 
   const {
-      data: buybackRates,
-  } = useQuery<Record<string, number>, Error>({
+      data: buybackRatesResponse,
+  } = useQuery<{ rates: Record<string, number>; notes: string; notesActive: boolean }, Error>({
       queryKey: ["airtime-cash-rates"],
       queryFn: getAirtimeCashBuybackRates,
   })
+
+  const buybackRates = buybackRatesResponse?.rates;
 
   let expectedAmount = 0;
   if (provider && buybackRates && amount) {
