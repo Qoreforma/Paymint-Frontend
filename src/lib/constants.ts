@@ -441,7 +441,7 @@ export const appServices = [
         icon: Rss,
         href: "/dashboard/services/airtime-cash",
         category: "Telecom",
-        featured: false,
+        featured: true,
         iconColor: "text-blue-600",
         bgColor: "bg-blue-50/50",
         borderColor: "border-blue-100",
