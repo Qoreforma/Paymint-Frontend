@@ -288,7 +288,7 @@ export const fetchAirtimeCashProviders = async () => {
     return res.data.data;
 }
 
-export const getAirtimeCashBuybackRates: QueryFunction<{rates: Record<string, number>, notes: string, notesActive: boolean}, [_: string, network?: string]> = async ({ queryKey }) => {
+export const getAirtimeCashBuybackRates: QueryFunction<{rates: any[], notes: string, notesActive: boolean}, [_: string, network?: string]> = async ({ queryKey }) => {
     const [, network] = queryKey;
     const url = network ? `/airtime/cash/buyback-rates?network=${network}` : "/airtime/cash/buyback-rates";
     const res = await api.get(url);

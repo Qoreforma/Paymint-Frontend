@@ -148,8 +148,9 @@ const RecipientDetails = () => {
     // Get expected amount
     let expectedAmount = 0;
     let rate = 0;
-    if (provider && buybackRates && currentAmount) {
-        rate = buybackRates[provider.toUpperCase()] || buybackRates[provider] || 0;
+    if (provider && buybackRates && Array.isArray(buybackRates) && currentAmount) {
+        const rateObj = buybackRates.find(r => r.network?.toUpperCase() === provider.toUpperCase());
+        rate = rateObj?.buyback_pct || 0;
         expectedAmount = (Number(currentAmount) * rate) / 100;
     }
 

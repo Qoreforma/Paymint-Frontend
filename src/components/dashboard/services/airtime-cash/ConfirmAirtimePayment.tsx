@@ -29,8 +29,9 @@ const ConfirmAirtimePayment = () => {
   const buybackRates = buybackRatesResponse?.rates;
 
   let expectedAmount = 0;
-  if (provider && buybackRates && amount) {
-      const rate = buybackRates[provider.toUpperCase()] || buybackRates[provider] || 0;
+  if (provider && buybackRates && Array.isArray(buybackRates) && amount) {
+      const rateObj = buybackRates.find((r: any) => r.network?.toUpperCase() === provider.toUpperCase());
+      const rate = rateObj?.buyback_pct || 0;
       expectedAmount = (Number(amount) * rate) / 100;
   }
 
