@@ -10,7 +10,7 @@ import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import { convertToLocalPhoneNumber, detectNigerianNetwork, formatAmount } from "@/lib/utils"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { fetchAirtimeProviders, verifyPhoneNumber, TAirtimeServiceProvider, getAirtimeCashBuybackRates, requestAirtimeCashOtp } from "@/lib/api/dashboard-apis/servicesApis"
+import { fetchAirtimeCashProviders, verifyPhoneNumber, TAirtimeServiceProvider, getAirtimeCashBuybackRates, requestAirtimeCashOtp } from "@/lib/api/dashboard-apis/servicesApis"
 import { AxiosError } from "axios"
 import { BsCheck2Circle } from "react-icons/bs"
 import { motion } from "framer-motion"
@@ -88,8 +88,8 @@ const RecipientDetails = () => {
         data: providers,
         isLoading,
     } = useQuery<TAirtimeServiceProvider[], Error>({
-        queryKey: ["airtime-providers"],
-        queryFn: fetchAirtimeProviders,
+        queryKey: ["airtime-cash-providers"],
+        queryFn: fetchAirtimeCashProviders,
     })
 
     const {
@@ -149,7 +149,7 @@ const RecipientDetails = () => {
     let expectedAmount = 0;
     let rate = 0;
     if (provider && buybackRates && currentAmount) {
-        rate = buybackRates[provider] || 0;
+        rate = buybackRates[provider.toUpperCase()] || buybackRates[provider] || 0;
         expectedAmount = (Number(currentAmount) * rate) / 100;
     }
 
@@ -182,7 +182,10 @@ const RecipientDetails = () => {
                     </div>
                     <div>
                         <p className="text-sm font-semibold text-amber-800 mb-1">How it works</p>
-                        <p className="text-sm text-amber-700 leading-relaxed whitespace-pre-line">{adminNotes}</p>
+                        <div 
+                            className="text-sm text-amber-700 leading-relaxed" 
+                            dangerouslySetInnerHTML={{ __html: adminNotes }} 
+                        />
                     </div>
                 </motion.div>
             )}

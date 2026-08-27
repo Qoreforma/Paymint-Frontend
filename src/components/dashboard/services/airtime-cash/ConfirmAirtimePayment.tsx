@@ -30,7 +30,7 @@ const ConfirmAirtimePayment = () => {
 
   let expectedAmount = 0;
   if (provider && buybackRates && amount) {
-      const rate = buybackRates[provider] || 0;
+      const rate = buybackRates[provider.toUpperCase()] || buybackRates[provider] || 0;
       expectedAmount = (Number(amount) * rate) / 100;
   }
 

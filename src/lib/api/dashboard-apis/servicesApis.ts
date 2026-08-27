@@ -283,6 +283,11 @@ export const getDataEpinReceipt = async (reference: string) => {
 }
 
 // Airtime To Cash
+export const fetchAirtimeCashProviders = async () => {
+    const res = await api.get("/airtime/cash/providers");
+    return res.data.data;
+}
+
 export const getAirtimeCashBuybackRates: QueryFunction<{rates: Record<string, number>, notes: string, notesActive: boolean}, [_: string, network?: string]> = async ({ queryKey }) => {
     const [, network] = queryKey;
     const url = network ? `/airtime/cash/buyback-rates?network=${network}` : "/airtime/cash/buyback-rates";
