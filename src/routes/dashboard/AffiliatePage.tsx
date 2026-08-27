@@ -12,6 +12,7 @@ import Loader from "@/components/Loader";
 import { useAuth } from "@/context/AuthContext";
 import { SpinRewardBanner } from "@/components/dashboard/rewards/SpinRewardBanner";
 import { SpinHistorySection } from "@/components/dashboard/rewards/SpinHistorySection";
+import TierProgressCard from "@/components/dashboard/rewards/TierProgressCard";
 
 const AffiliatePage = () => {
   const [copied, setCopied] = useState(false);
@@ -60,6 +61,9 @@ const AffiliatePage = () => {
         <h1 className="text-[var(--aqua)] text-2xl font-medium text-left mb-8 max-md:hidden">Affiliate</h1>
 
         {uplineData && <UplineTable uplineData={uplineData} />}
+
+        {/* Current tier referral progress */}
+        <TierProgressCard />
 
         {/* Spin & Win Rewards Available Banner */}
         <SpinRewardBanner />
