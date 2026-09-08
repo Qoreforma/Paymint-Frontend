@@ -30,6 +30,7 @@ type TServiceFlowState = {
     formData: Record<string, any>;
     
     txnResult: GenericTransactionResult | null;
+    errorMessage?: string | null;
     
     cashbackRule: CashbackRule | null;
     useCashback: boolean;
@@ -55,6 +56,7 @@ const initialState = {
     
     formData: {},
     txnResult: null,
+    errorMessage: null,
     cashbackRule: null,
     useCashback: false,
 }

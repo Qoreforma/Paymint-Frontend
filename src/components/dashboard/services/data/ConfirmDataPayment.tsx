@@ -29,13 +29,11 @@ const ConfirmDataPayment = () => {
           update({step: step+1, txnResult: data});
         },
         onError: (error: AxiosError) => {
-          console.log({error})
-            update({step: step+1, txnResult: null});
-            const errData = error.response?.data as { message?: string };
-            if(errData.message){
-                return toast.error(errData.message)
-            }
-            toast.error("Something went wrong, please try again")
+          console.log({error});
+          const errData = error.response?.data as { message?: string };
+          const failureMessage = errData?.message || "Something went wrong, please try again";
+          update({step: step+1, txnResult: null, errorMessage: failureMessage});
+          toast.error(failureMessage);
         }
     })
   

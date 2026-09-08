@@ -9,7 +9,7 @@ import SuccessIcon from "@/assets/dashboard/success_icon.svg";
 import FailedIcon from "@/assets/dashboard/fail_icon.svg";
 
 const Status = () => {
-    const {txnResult, phone, plan, dataPlans, reset} = useServiceFlowStore();
+    const {txnResult, phone, plan, dataPlans, reset, errorMessage} = useServiceFlowStore();
 
     const planAmount = dataPlans.find((dataPlan) => dataPlan.id === plan)?.amount
     const planName = dataPlans.find((dataPlan) => dataPlan.id === plan)?.name
@@ -21,6 +21,7 @@ const Status = () => {
     const currentStatus = socketStatus || txnResult?.result?.status || "failed";
     const isSuccess = currentStatus === "success";
     const isPending = currentStatus === "processing" || currentStatus === "pending";
+    const failureReason = errorMessage || txnResult?.result?.metadata?.failureReason;
 
   return (
     <div className="grid place-items-center min-h-full w-full">
@@ -34,9 +35,14 @@ const Status = () => {
                 <>
                     <img className="h-[113px] w-[124px] md:w-[175px] md:h-[160px] object-cover" src={isSuccess ? SuccessIcon : FailedIcon} />
                     <h1 className="font-medium text-2xl text-[var(--aqua)] mt-2">Transaction {isSuccess ? "successful" : "failed"}</h1>
-                    <p className="md:text-xl md:font-medium text-center mt-3 mb-12 md:my-10 max-md:text-[#717171]">
+                    <p className="md:text-xl md:font-medium text-center mt-3 mb-4 md:my-6 max-md:text-[#717171]">
                         <span className="font-medium">Your Data purchase of {planName} for {formatAmount(parseInt(planAmount?.toString() as string))} on <span className="font-medium">{phone}</span> {isSuccess ? "is successful" : "failed"}. </span>
                     </p>
+                    {!isSuccess && failureReason && (
+                        <div className="w-full mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm text-center">
+                            <p className="font-medium">{failureReason}</p>
+                        </div>
+                    )}
                     <div className="flex flex-col items-center w-full gap-2">
                         <CustomButton className="w-full text-center" href="/dashboard">Return to dashboard</CustomButton>
                         {
