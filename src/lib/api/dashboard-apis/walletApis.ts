@@ -7,6 +7,8 @@ export type Wallet = {
   _id: string;
   userId: string;
   balance: number;
+  bonusBalance?: number;
+  commissionBalance?: number;
   currency: string;
   createdAt: string;
   updatedAt: string;

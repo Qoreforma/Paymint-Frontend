@@ -6,8 +6,9 @@ import EnterPin from "@/components/dashboard/EnterPin";
 import useServiceFlowStore from "@/stores/useServiceFlowStore";
 import { formatAmount } from "@/lib/utils";
 import useIsMobile from "@/hooks/useIsMobile";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { buyAirtime } from "@/lib/api/dashboard-apis/servicesApis";
+import { getWallet } from "@/lib/api/dashboard-apis/walletApis";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
@@ -17,6 +18,11 @@ const ConfirmAirtimePayment = () => {
 
   const isMobile = useIsMobile();
   const {update, step, phone, amount, provider, useCashback, cashbackRule} = useServiceFlowStore();
+
+  const { data: wallet } = useQuery({
+    queryKey: ["wallet-balance"],
+    queryFn: getWallet,
+  });
 
   const {mutate, isPending} = useMutation({
       mutationFn: buyAirtime,
@@ -52,7 +58,14 @@ const ConfirmAirtimePayment = () => {
             {cashbackRule && (
               <div className="flex items-center justify-between bg-green-50/50 p-3 rounded-lg border border-green-100 mb-6">
                 <div className="flex flex-col text-left">
-                  <span className="text-sm font-medium text-green-800">Apply Cashback Balance</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-green-800">Apply Cashback Balance</span>
+                    {typeof wallet?.bonusBalance === "number" && (
+                      <span className="text-[11px] font-semibold text-green-700 bg-green-200/70 px-2 py-0.5 rounded-full">
+                        ₦{wallet.bonusBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-green-600/80">Use your earned cashback to discount this purchase</span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">

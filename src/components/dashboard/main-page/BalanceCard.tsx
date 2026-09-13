@@ -108,6 +108,17 @@ const BalanceCard = () => {
                 )}
               </button>
             </div>
+
+            {/* Cashback / Bonus Balance Badge */}
+            {typeof wallet?.bonusBalance === "number" && (
+              <div 
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-xs font-medium backdrop-blur-sm shadow-sm"
+                title="Accumulated Cashback Balance"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Cashback: {hideBalance ? "••••" : `₦${wallet.bonusBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</span>
+              </div>
+            )}
           </div>
 
           <div className="mt-1">
