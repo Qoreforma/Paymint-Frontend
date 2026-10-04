@@ -4,6 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, X } from "lucide-react";
 import { appServices } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { getServicesStatus, ServicesData } from "@/lib/api/dashboard-apis/generics";
+import { toast } from "sonner";
 
 interface AllServicesModalProps {
   open: boolean;
@@ -13,6 +16,16 @@ interface AllServicesModalProps {
 const AllServicesModal = ({ open, onOpenChange }: AllServicesModalProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { data: servicesStatus } = useQuery<ServicesData, Error>({
+    queryKey: ["servicesStatus"],
+    queryFn: getServicesStatus,
+  });
+
+  const getServiceStatusInfo = (serviceCode?: string) => {
+    if (!serviceCode || !servicesStatus) return null;
+    return servicesStatus[serviceCode] || (serviceCode === "cable_tv" ? servicesStatus.cable : undefined);
+  };
 
   // Auto-focus search input when modal opens
   useEffect(() => {
@@ -109,17 +122,51 @@ const AllServicesModal = ({ open, onOpenChange }: AllServicesModalProps) => {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {services.map(({id, label, icon: Icon, href, ...rest}) => {
                       const service = rest as any;
+                      const statusInfo = getServiceStatusInfo(service.serviceCode);
+                      const isDeactivated = statusInfo?.status === "deactivated";
+                      const isTemporaryDeactivated = statusInfo?.status === "temporary-deactivated";
+                      const isComingSoon = statusInfo?.status === "coming-soon";
+                      const isInactive = isDeactivated || isTemporaryDeactivated || isComingSoon;
+
+                      const handleServiceClick = (e: React.MouseEvent) => {
+                        if (isInactive) {
+                          e.preventDefault();
+                          toast.info(statusInfo?.message || `${label} is currently unavailable.`);
+                          return;
+                        }
+                        onOpenChange(false);
+                      };
+
                       return (
                       <Link 
                         key={id}
                         to={href} 
-                        onClick={() => onOpenChange(false)}
-                        className={`group relative overflow-hidden flex flex-col items-center justify-center p-4 border ${service.borderColor || 'border-slate-200'} ${service.bgColor || 'bg-white'} rounded-xl transition-all duration-300 hover:shadow-md hover:-translate-y-1 text-center h-[130px]`}
+                        onClick={handleServiceClick}
+                        className={`group relative overflow-hidden flex flex-col items-center justify-center p-3 border ${service.borderColor || 'border-slate-200'} ${service.bgColor || 'bg-white'} rounded-xl transition-all duration-300 text-center h-[135px] ${
+                          isInactive 
+                            ? 'opacity-75 hover:border-slate-300 cursor-pointer' 
+                            : 'hover:shadow-md hover:-translate-y-1'
+                        }`}
                       >
-                          <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm mb-3 border ${service.borderColor || 'border-slate-100'}`}>
-                              <img src={Icon as string} alt={label} className={`size-6`} />
+                          {isComingSoon && (
+                            <span className="absolute top-2 right-2 text-[9px] font-semibold tracking-tight px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                              Soon
+                            </span>
+                          )}
+                          {isTemporaryDeactivated && (
+                            <span className="absolute top-2 right-2 text-[9px] font-semibold tracking-tight px-1.5 py-0.2 rounded-full bg-orange-100 text-orange-800 border border-orange-200">
+                              Maint.
+                            </span>
+                          )}
+                          {isDeactivated && (
+                            <span className="absolute top-2 right-2 text-[9px] font-semibold tracking-tight px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                              Inactive
+                            </span>
+                          )}
+                          <div className={`w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm mb-2 border ${service.borderColor || 'border-slate-100'}`}>
+                              <img src={Icon as string} alt={label} className={`size-5 object-contain`} />
                           </div>
-                          <p className="text-slate-800 font-display text-[13px] font-semibold tracking-tight">{label}</p>
+                          <p className="text-slate-800 font-display text-[12px] font-semibold tracking-tight leading-tight line-clamp-1">{label}</p>
                           {service.subtitle && (
                             <p className="text-slate-500 text-[10px] leading-tight mt-1 px-1 line-clamp-2">
                               {service.subtitle}

@@ -54,6 +54,7 @@ import InternationalData from "./components/dashboard/services/international-dat
 import AirtimePrint from "./components/dashboard/services/airtime-print/AirtimePrint";
 import DataPrint from "./components/dashboard/services/data-print/DataPrint";
 import AirtimeCash from "./components/dashboard/services/airtime-cash/AirtimeCash";
+import Smm from "./components/dashboard/services/smm/Smm";
 
 function App() {
   const router = createBrowserRouter([
@@ -175,6 +176,10 @@ function App() {
         {
           path: "services/epin",
           element: <Epin />
+        },
+        {
+          path: "services/smm",
+          element: <Smm />
         },
         {
           path: "affiliate",

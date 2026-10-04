@@ -9,6 +9,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getServicesStatus } from "@/lib/api/dashboard-apis/generics";
 import { fetchAirtimeProviders, fetchDataProviders } from "@/lib/api/dashboard-apis/servicesApis";
 import { useWalletSocket } from "@/hooks/useWalletSocket";
+import { useSupportSocket } from "@/hooks/useSupportSocket";
+import MintyChat from "@/components/dashboard/support/MintyChat";
 
 const DashboardLayout = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -16,6 +18,7 @@ const DashboardLayout = () => {
     const queryClient = useQueryClient();
 
     useWalletSocket();
+    useSupportSocket();
 
     useEffect(() => {
         if (accessToken) {
@@ -41,6 +44,7 @@ const DashboardLayout = () => {
                     </ScrollToTop>
                 </div>
             </main>
+            <MintyChat />
         </div>
     )
 }

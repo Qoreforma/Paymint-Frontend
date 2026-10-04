@@ -329,13 +329,12 @@ export const otherServicesMobile = [
 ]
 
 import Rss from "@/assets/dashboard/rss.svg";
-import Globe from "@/assets/dashboard/globe.svg"
-import Zap from "@/assets/dashboard/zap.svg"
-import HardDrive from "@/assets/dashboard/hard-drive.svg"
-import Tv from "@/assets/dashboard/tv.svg"
-import Key from "@/assets/dashboard/key.svg"
-
-
+import Globe from "@/assets/dashboard/globe.svg";
+import Zap from "@/assets/dashboard/zap.svg";
+import HardDrive from "@/assets/dashboard/hard-drive.svg";
+import Tv from "@/assets/dashboard/tv.svg";
+import Key from "@/assets/dashboard/key.svg";
+import SmmIcon from "@/assets/dashboard/smm.svg";
 
 export const appServices = [
     {
@@ -344,6 +343,7 @@ export const appServices = [
         subtitle: "Top up any network",
         icon: Rss,
         href: "/dashboard/services/airtime",
+        serviceCode: "airtime",
         category: "Telecom",
         featured: true,
         iconColor: "text-blue-600",
@@ -356,6 +356,7 @@ export const appServices = [
         subtitle: "Cheap data bundles",
         icon: Globe,
         href: "/dashboard/services/data",
+        serviceCode: "data",
         category: "Telecom",
         featured: true,
         iconColor: "text-green-600",
@@ -368,6 +369,7 @@ export const appServices = [
         subtitle: "Pay electricity bills",
         icon: Zap,
         href: "/dashboard/services/electricity",
+        serviceCode: "electricity",
         category: "Utilities",
         featured: true,
         iconColor: "text-amber-500",
@@ -380,6 +382,7 @@ export const appServices = [
         subtitle: "Fund your account",
         icon: HardDrive,
         href: "/dashboard/services/betting",
+        serviceCode: "betting",
         category: "Entertainment",
         featured: true,
         iconColor: "text-red-500",
@@ -392,6 +395,7 @@ export const appServices = [
         subtitle: "Pay for cable TV",
         icon: Tv,
         href: "/dashboard/services/cable",
+        serviceCode: "cable_tv",
         category: "Entertainment",
         featured: true,
         iconColor: "text-indigo-600",
@@ -404,6 +408,7 @@ export const appServices = [
         subtitle: "Generate e-pins",
         icon: Key,
         href: "/dashboard/services/epin",
+        serviceCode: "education",
         category: "Utilities",
         featured: true,
         iconColor: "text-purple-600",
@@ -411,11 +416,25 @@ export const appServices = [
         borderColor: "border-purple-100",
     },
     {
+        id: 18,
+        label: "Social Media (SMM)",
+        subtitle: "Followers, likes & views",
+        icon: SmmIcon,
+        href: "/dashboard/services/smm",
+        serviceCode: "smm",
+        category: "Marketing",
+        featured: true,
+        iconColor: "text-pink-600",
+        bgColor: "bg-pink-50/50",
+        borderColor: "border-pink-100",
+    },
+    {
         id: 15,
         label: "Airtime Print",
         subtitle: "Print airtime vouchers",
         icon: Rss,
         href: "/dashboard/services/airtime-print",
+        serviceCode: "airtime_epin",
         category: "Print Services",
         featured: false,
         iconColor: "text-teal-600",
@@ -428,6 +447,7 @@ export const appServices = [
         subtitle: "Print data vouchers",
         icon: Globe,
         href: "/dashboard/services/data-print",
+        serviceCode: "data_epin",
         category: "Print Services",
         featured: false,
         iconColor: "text-cyan-600",
@@ -440,6 +460,7 @@ export const appServices = [
         subtitle: "Convert airtime to cash",
         icon: Rss,
         href: "/dashboard/services/airtime-cash",
+        serviceCode: "airtime_cash",
         category: "Telecom",
         featured: true,
         iconColor: "text-blue-600",

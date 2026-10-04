@@ -309,3 +309,65 @@ export const finalizeAirtimeCash = async (payload: { phone: string, network: str
     const res = await api.post("/airtime/cash/finalize", payload);
     return res.data.data;
 }
+
+// SMM (Social Media Marketing)
+export interface ISmmPlatform {
+  id: string;
+  _id?: string;
+  name: string;
+  code: string;
+  logo?: string;
+  serviceTypeCode: string;
+}
+
+export interface ISmmProduct {
+  _id: string;
+  id?: string;
+  name: string;
+  amount: number; // NGN rate per 1,000 units
+  productType: string;
+  serviceId?: any;
+  attributes?: {
+    min?: number;
+    max?: number;
+    type?: string;
+    platform?: string;
+    originalCategory?: string;
+    [key: string]: any;
+  };
+}
+
+export const fetchSmmPlatforms = async (): Promise<ISmmPlatform[]> => {
+  const res = await api.get("/smm/platforms");
+  return res.data.data;
+};
+
+export const fetchSmmProductTypes = async (serviceCode: string): Promise<string[]> => {
+  const res = await api.get(`/smm/types/${serviceCode}`);
+  return res.data.data;
+};
+
+export const fetchSmmProducts = async (
+  serviceCode: string,
+  productType?: string,
+  options?: { page?: number; limit?: number }
+): Promise<{ products: ISmmProduct[]; total: number; page: number; limit: number }> => {
+  const page = options?.page || 1;
+  const limit = options?.limit || 100;
+  const url = productType && productType.toLowerCase() !== "all"
+    ? `/smm/products/${serviceCode}/${encodeURIComponent(productType)}?page=${page}&limit=${limit}`
+    : `/smm/products/${serviceCode}?page=${page}&limit=${limit}`;
+  const res = await api.get(url);
+  return res.data.data;
+};
+
+export const placeSmmOrder = async (payload: {
+  productId: string;
+  link: string;
+  quantity: number;
+  pin?: string;
+}) => {
+  const res = await api.post("/smm/order", payload);
+  return res.data.data;
+};
+

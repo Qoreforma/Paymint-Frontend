@@ -3,6 +3,7 @@ import api from "../axios";
 export type ServiceStatus =
   | "active"
   | "deactivated"
+  | "temporary-deactivated"
   | "coming-soon";
 
 export interface ServiceInfo {
@@ -16,6 +17,7 @@ export interface ServicesData {
   airtime: ServiceInfo;
   airtime_cash: ServiceInfo;
   cable_tv: ServiceInfo;
+  cable?: ServiceInfo;
   electricity: ServiceInfo;
   education: ServiceInfo;
   betting: ServiceInfo;
@@ -25,6 +27,8 @@ export interface ServicesData {
   giftcard: ServiceInfo;
   hotel: ServiceInfo;
   withdrawal: ServiceInfo;
+  smm?: ServiceInfo;
+  [key: string]: ServiceInfo | undefined;
 }
 
 

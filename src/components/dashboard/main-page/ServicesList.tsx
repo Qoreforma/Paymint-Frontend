@@ -1,12 +1,19 @@
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import { useEffect } from "react"
-import { useQueryClient } from "@tanstack/react-query"
-import { fetchAirtimeProviders, fetchDataProviders, fetchElectricityProviders, fetchBettingProviders } from "@/lib/api/dashboard-apis/servicesApis"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { fetchAirtimeProviders, fetchDataProviders, fetchElectricityProviders, fetchBettingProviders, fetchSmmPlatforms } from "@/lib/api/dashboard-apis/servicesApis"
+import { getServicesStatus, ServicesData } from "@/lib/api/dashboard-apis/generics"
 import { appServices } from "@/lib/constants";
+import { toast } from "sonner";
 
 const ServicesList = ({ onOpenAllServices }: { onOpenAllServices: () => void }) => {
   const queryClient = useQueryClient();
+
+  const { data: servicesStatus } = useQuery<ServicesData, Error>({
+    queryKey: ["servicesStatus"],
+    queryFn: getServicesStatus,
+  });
 
   useEffect(() => {
     // Silently pre-fetch most commonly used providers for instant loading
@@ -14,7 +21,13 @@ const ServicesList = ({ onOpenAllServices }: { onOpenAllServices: () => void }) 
     queryClient.prefetchQuery({ queryKey: ["data-providers"], queryFn: fetchDataProviders });
     queryClient.prefetchQuery({ queryKey: ["electricity-providers"], queryFn: fetchElectricityProviders });
     queryClient.prefetchQuery({ queryKey: ["betting-providers"], queryFn: fetchBettingProviders });
+    queryClient.prefetchQuery({ queryKey: ["smm-platforms"], queryFn: fetchSmmPlatforms });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const getServiceStatusInfo = (serviceCode?: string) => {
+    if (!serviceCode || !servicesStatus) return null;
+    return servicesStatus[serviceCode] || (serviceCode === "cable_tv" ? servicesStatus.cable : undefined);
+  };
 
   const featuredServices = appServices.filter(s => (s as any).featured);
 
@@ -30,11 +43,24 @@ const ServicesList = ({ onOpenAllServices }: { onOpenAllServices: () => void }) 
           {
               featuredServices.map(({id, label, icon: Icon, href, ...rest}, i) => {
                   const service = rest as any;
+                  const statusInfo = getServiceStatusInfo(service.serviceCode);
+                  const isDeactivated = statusInfo?.status === "deactivated";
+                  const isTemporaryDeactivated = statusInfo?.status === "temporary-deactivated";
+                  const isComingSoon = statusInfo?.status === "coming-soon";
+                  const isInactive = isDeactivated || isTemporaryDeactivated || isComingSoon;
+
+                  const handleServiceClick = (e: React.MouseEvent) => {
+                    if (isInactive) {
+                      e.preventDefault();
+                      toast.info(statusInfo?.message || `${label} is currently unavailable.`);
+                    }
+                  };
+
                   return (
                   <motion.div 
                     initial={{opacity: 0, y: 15}}
                     whileInView={{opacity: 100, y: 0}}
-                    whileHover={{y: -3, scale: 1.01}}
+                    whileHover={isInactive ? {} : {y: -3, scale: 1.01}}
                     transition={{delay: i*0.04, duration: .3 }}
                     viewport={{once: true}}
                     key={id} 
@@ -42,10 +68,32 @@ const ServicesList = ({ onOpenAllServices }: { onOpenAllServices: () => void }) 
                   >
                       <Link 
                         to={href} 
-                        className="relative overflow-hidden flex flex-col items-start justify-between p-4 sm:p-5 bg-white border border-slate-200/80 rounded-2xl transition-all duration-300 hover:shadow-md hover:border-blue-200 h-[155px] w-full"
+                        onClick={handleServiceClick}
+                        className={`relative overflow-hidden flex flex-col items-start justify-between p-4 sm:p-5 bg-white border border-slate-200/80 rounded-2xl transition-all duration-300 h-[155px] w-full ${
+                          isInactive 
+                            ? 'opacity-75 hover:border-slate-300' 
+                            : 'hover:shadow-md hover:border-blue-200'
+                        }`}
                       >
-                          <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105">
-                             <img src={Icon as string} alt={label} className="size-6 object-contain" />
+                          <div className="w-full flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105">
+                               <img src={Icon as string} alt={label} className="size-6 object-contain" />
+                            </div>
+                            {isComingSoon && (
+                              <span className="text-[10px] font-semibold tracking-tight px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                Coming Soon
+                              </span>
+                            )}
+                            {isTemporaryDeactivated && (
+                              <span className="text-[10px] font-semibold tracking-tight px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">
+                                Maintenance
+                              </span>
+                            )}
+                            {isDeactivated && (
+                              <span className="text-[10px] font-semibold tracking-tight px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                                Unavailable
+                              </span>
+                            )}
                           </div>
                           <div className="w-full text-left mt-3">
                             <p className="text-slate-800 font-display text-sm font-semibold tracking-tight text-left truncate">{label}</p>
