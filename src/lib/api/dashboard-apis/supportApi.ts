@@ -8,7 +8,7 @@ import type {
 
 // ─── 3.1  Check Active Ticket ────────────────────────────────────────────────
 export const checkActiveTicket = async (): Promise<ActiveTicketResponse> => {
-  const res = await api.get("/client/support/tickets/active");
+  const res = await api.get("/support/tickets/active");
   return res.data;
 };
 
@@ -22,7 +22,7 @@ export interface OpenTicketApiPayload {
 export const openSupportTicket = async (
   payload: OpenTicketApiPayload
 ): Promise<OpenTicketResponse> => {
-  const res = await api.post("/client/support/tickets", payload);
+  const res = await api.post("/support/tickets", payload);
   return res.data;
 };
 
@@ -40,7 +40,7 @@ export const fetchSupportMessages = async ({
   before,
   after,
 }: FetchMessagesParams): Promise<MessagesResponse> => {
-  const res = await api.get(`/client/support/tickets/${ticketId}/messages`, {
+  const res = await api.get(`/support/tickets/${ticketId}/messages`, {
     params: {
       limit,
       ...(before ? { before } : {}),
@@ -55,7 +55,7 @@ export const closeSupportTicket = async (
   ticketId: string
 ): Promise<CloseTicketResponse> => {
   const res = await api.post(
-    `/client/support/tickets/${ticketId}/close`,
+    `/support/tickets/${ticketId}/close`,
     {}
   );
   return res.data;
