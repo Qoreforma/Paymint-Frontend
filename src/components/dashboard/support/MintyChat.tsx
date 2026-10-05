@@ -51,18 +51,16 @@ const EscalationBanner = () => {
 
   if (ticketStatus === "queued") {
     return (
-      <div className="mx-3 mb-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm">
-        <p className="font-semibold text-amber-800 font-display">
-          🧑‍💼 Connecting you to an agent…
-        </p>
-        {escalationInfo?.queuePosition && (
-          <p className="text-amber-700 mt-0.5">
-            Queue position: <strong>#{escalationInfo.queuePosition}</strong>
-            {escalationInfo.estimatedWaitMinutes
-              ? ` · ~${escalationInfo.estimatedWaitMinutes} min wait`
-              : ""}
+      <div className="mx-3 mb-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-sm flex items-center gap-2.5">
+        <span className="text-base shrink-0">🧑‍💼</span>
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold text-amber-900 font-display text-xs">
+            Connecting you to an agent…
           </p>
-        )}
+          <p className="text-amber-700 text-[11px] mt-0.5">
+            Please hold on, an agent will assist you shortly.
+          </p>
+        </div>
       </div>
     );
   }
@@ -250,6 +248,15 @@ const MintyChat = () => {
   const [initialising, setInitialising] = useState(false);
   const [feedbackDone, setFeedbackDone] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [copiedTicket, setCopiedTicket] = useState(false);
+
+  const handleCopyTicketNumber = () => {
+    if (ticket?.ticketNumber) {
+      navigator.clipboard.writeText(ticket.ticketNumber);
+      setCopiedTicket(true);
+      setTimeout(() => setCopiedTicket(false), 2000);
+    }
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -481,11 +488,26 @@ const MintyChat = () => {
                 : "Paymint AI Assistant"}
             </p>
           </div>
-          {/* Ticket number */}
+          {/* Ticket number & copy button */}
           {ticket && (
-            <span className="text-[10px] bg-white/20 rounded-full px-2 py-0.5 font-mono shrink-0">
-              {ticket.ticketNumber}
-            </span>
+            <button
+              type="button"
+              onClick={handleCopyTicketNumber}
+              className="flex items-center gap-1.5 text-[10px] bg-white/20 hover:bg-white/30 text-white rounded-full px-2.5 py-1 font-mono shrink-0 transition-colors cursor-pointer"
+              title="Click to copy ticket reference"
+            >
+              <span>{ticket.ticketNumber}</span>
+              {copiedTicket ? (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-300">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              ) : (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-75">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              )}
+            </button>
           )}
           {/* Header Close Button */}
           <button

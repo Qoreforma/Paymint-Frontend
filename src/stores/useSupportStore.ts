@@ -85,9 +85,14 @@ const useSupportStore = create<SupportStore>((set, get) => ({
     })),
 
   appendMessage: (message) =>
-    set((state) => ({
-      messages: [...state.messages, message],
-    })),
+    set((state) => {
+      if (message._id && state.messages.some((m) => m._id === message._id)) {
+        return state;
+      }
+      return {
+        messages: [...state.messages, message],
+      };
+    }),
 
   replaceOptimisticMessage: (tempId, confirmed) =>
     set((state) => ({
