@@ -32,6 +32,8 @@ export type TDataServiceProvider = {
   logo: string;
   serviceTypeCode: string;
   paymentOptions: string[];
+  status?: "active" | "coming-soon" | "deactivated" | "temporary-deactivated";
+  statusMessage?: string | null;
 };
 
 export type TAirtimeServiceProvider = {
@@ -41,6 +43,8 @@ export type TAirtimeServiceProvider = {
   logo: string;
   serviceTypeCode: string;
   paymentOptions: string[];
+  status?: "active" | "coming-soon" | "deactivated" | "temporary-deactivated";
+  statusMessage?: string | null;
 };
 
 // AIRTIME
