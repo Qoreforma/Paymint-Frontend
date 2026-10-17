@@ -36,7 +36,7 @@ const MobileOtherServicesDrawer = () => {
                     {
                         otherServicesMobile.map(({id, href,title,subTitle, icon}) => (
                             <Fragment key={id}>
-                                <Link to={href} className="flex items-center gap-4">
+                                <Link to={href} onClick={closeSidebar} className="flex items-center gap-4">
                                     <div className="size-12 bg-[#F1F1F1] rounded-full grid place-items-center">
                                         <img src={icon} className="object-cover size-6" />
                                     </div>

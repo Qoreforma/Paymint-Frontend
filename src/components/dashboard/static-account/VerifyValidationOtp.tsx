@@ -1,7 +1,7 @@
 import React, { FormEvent, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { toast } from "sonner";
 import { 
   KeyRound, 
@@ -49,6 +49,7 @@ const VerifyValidationOtp: React.FC<VerifyValidationOtpProps> = ({
             setIdentityId(null);
         },
         onError: (error: AxiosError) => {
+            setOtp("");
             const errData = error.response?.data as { message?: string };
             if (errData.message) {
                 return toast.error(errData.message);
@@ -87,7 +88,7 @@ const VerifyValidationOtp: React.FC<VerifyValidationOtpProps> = ({
                         6-Digit Security Code
                     </label>
                     <InputOTP
-                        pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+                        pattern={REGEXP_ONLY_DIGITS}
                         maxLength={6}
                         value={otp}
                         onChange={(value) => setOtp(value)}

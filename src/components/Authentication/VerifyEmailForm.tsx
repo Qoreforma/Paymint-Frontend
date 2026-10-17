@@ -33,33 +33,17 @@ const VerifyEmailForm = ({showNewPasswordForm, setFormData}: TVerifyEmailForm ) 
      const {mutate: resendOtp, isPending: isSendingOtp} = useMutation({
         mutationFn: resendPasswordOtp,
         onSuccess: (data) => {
-            console.log(data)
             toast.success(data.message)
         },
         onError: (error: AxiosError) => {
             const errData = error.response?.data as { message?: string };
-                if(errData.message){
+                if(errData?.message){
                     return toast.error(errData.message)
                 }
             toast.error("Something went wrong, please try again")
         }
     })
 
-    //  const {mutate: verifyOtp, isPending: isVerifying} = useMutation({
-    //     mutationFn: verifyPasswordToken,
-    //     onSuccess: (data) => {
-    //         console.log(data)
-    //         toast.success(data.message)
-    //     },
-    //     onError: (error: AxiosError) => {
-    //         const errData = error.response?.data as { message?: string };
-    //             if(errData.message){
-    //                 return toast.error(errData.message)
-    //             }
-    //         toast.error("Something went wrong, please try again")
-    //     }
-    // })
- 
      const emailInput = watch("email");
      
      const sendCode = async () => {
@@ -73,9 +57,7 @@ const VerifyEmailForm = ({showNewPasswordForm, setFormData}: TVerifyEmailForm ) 
      }
  
      const onSubmit = (data: TFormData) => {
-         console.log(data)
          setFormData(data)
-        
          showNewPasswordForm();
      }
 

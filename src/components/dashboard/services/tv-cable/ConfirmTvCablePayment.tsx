@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useState, useCallback } from "react"
 
 import CustomButton from "@/components/CustomButton"
 import BackButton from "@/components/Authentication/BackButton"
@@ -21,24 +21,28 @@ const ConfirmTvCablePayment = () => {
   const {mutate, isPending} = useMutation({
       mutationFn: subscribeToTv,
       onSuccess: (data) => {
+        SetPaymenTPin("");
+        setShowPinForm(false);
         update({step: step+1, txnResult: data as TvSubscriptionResponse});
       },
       onError: (error: AxiosError) => {
-        console.log({error})
-          update({step: step+1, txnResult: null});
-          const errData = error.response?.data as { message?: string };
-          if(errData.message){
-              return toast.error(errData.message)
-          }
-          toast.error("Something went wrong, please try again")
+        SetPaymenTPin("");
+        setShowPinForm(false);
+        update({step: step+1, txnResult: null});
+        const errData = error.response?.data as { message?: string };
+        if(errData?.message){
+            return toast.error(errData.message)
+        }
+        toast.error("Something went wrong, please try again")
       }
   })
 
-  const handleSubmit = (e?: FormEvent) => {
+  const handleSubmit = useCallback((e?: FormEvent) => {
       if (e) e.preventDefault();
-      if(!provider || !selectedPackage) return
+      if (isPending) return;
+      if (!provider || !selectedPackage) return;
       mutate({provider: provider.code, number: smartCardNo, productId: String(selectedPackage.id), pin: paymenTPin, type: "renew" })
-  }
+  }, [isPending, mutate, provider, selectedPackage, smartCardNo, paymenTPin]);
 
   return (
     <div className="min-h-full flex md:items-center justify-center relative">
@@ -52,7 +56,10 @@ const ConfirmTvCablePayment = () => {
         </section>
         <EnterPin 
             isOpen={showPinForm} 
-            onClose={() => setShowPinForm(false)} 
+            onClose={() => {
+                SetPaymenTPin("");
+                setShowPinForm(false);
+            }} 
             disable={isPending} 
             handleSubmit={handleSubmit} 
             value={paymenTPin} 

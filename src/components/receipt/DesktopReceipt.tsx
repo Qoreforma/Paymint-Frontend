@@ -26,8 +26,6 @@ const DesktopReceipt = ({txnDetails, fetchingDetails}:{txnDetails: Transaction |
 
     if(fetchingDetails) return <Loader className="w-full h-full max-md:hidden" />;
 
-    console.log({txnDetails})
-
   return (
     <div className="hidden md:grid place-items-center min-h-full w-full">
         <section className="w-full max-w-[440px] flex flex-col items-center">

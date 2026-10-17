@@ -1,9 +1,10 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { useRef, useEffect, Suspense } from "react";
 
 import ScrollToTop from "@/components/ScrollToTop";
 import Sidebar from "../../components/dashboard/sidebar/Sidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
-import { useRef, useEffect } from "react";
+import Loader from "@/components/Loader";
 import { useAuth } from "@/context/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { getServicesStatus } from "@/lib/api/dashboard-apis/generics";
@@ -40,7 +41,9 @@ const DashboardLayout = () => {
                 <DashboardHeader />
                 <div ref={scrollRef} className="bg-[#F9FAFB] w-full flex-1 overflow-y-auto px-5 md:px-8 pt-5 pb-32">
                     <ScrollToTop containerRef={scrollRef}>
-                        <Outlet />
+                        <Suspense fallback={<Loader className="w-full h-96 min-h-[300px]" />}>
+                            <Outlet />
+                        </Suspense>
                     </ScrollToTop>
                 </div>
             </main>

@@ -65,12 +65,8 @@ const RecipientDetails = () => {
 
     const {mutate, isPending: isVerifying, data: verifiedMeter, error: verifyError} = useMutation<ElectricityVerificationResponse, AxiosError, VerifyMeterPayload>({
         mutationFn: verifyMeterNumber,
-        onSuccess: (data) => {
-            console.log(data)
-        },
-        onError: (error: AxiosError) => {
-            console.log({error})
-        }
+        onSuccess: () => {},
+        onError: () => {}
     })
 
     let verifyErrData: { message?: string } | undefined;
@@ -150,8 +146,9 @@ const RecipientDetails = () => {
                 providers={providers?.map(p => ({id: String(p.id), name: p.name, code: p.code, logo: p.logo})) || []}
                 isLoading={isLoading}
                 selectedProviderCode={selectedProvider?.code || null}
-                onSelect={(_, providerId) => {
-                    update({provider: providerId})
+                onSelect={(providerCode, providerId) => {
+                    const prov = providers?.find((p) => String(p.id) === String(providerId) || p.code === providerCode);
+                    update({provider: providerId, providerName: prov?.name || ""});
                 }}
             />
 

@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -5,56 +6,61 @@ import {
 } from "react-router-dom";
 
 import { Toaster } from 'sonner';
-
+import { AlertTriangle, Info } from "lucide-react";
+import { FaCircleCheck } from "react-icons/fa6";
+import { BiErrorCircle } from "react-icons/bi";
 
 import { NotificationPrompt } from "./components/ui/NotificationPrompt";
 
 import AuthLayout from "./routes/layout/AuthLayout";
-import VerifyPhone from "./routes/auth-pages/VerifyPhone";
-import UserDetails from "./routes/auth-pages/UserDetails";
-import VerifyEmail from "./routes/auth-pages/VerifyEmail";
-import SetTransactionPin from "./routes/auth-pages/SetTransactionPin";
-import ResetPassword from "./routes/auth-pages/ResetPassword";
-import SignUp from "./routes/auth-pages/SignUp";
-import Login from "./routes/auth-pages/LogIn";
-
 import DashboardLayout from "./routes/layout/DashboardLayout";
-
-import Dashboard from "./components/dashboard/main-page/Dashboard";
-import NotificationsPage from "./routes/dashboard/NotificationsPage";
-import AffiliatePage from "./routes/dashboard/AffiliatePage";
-import { AlertTriangle, Info } from "lucide-react";
-import { FaCircleCheck } from "react-icons/fa6";
-import TransferFunds from "./routes/dashboard/TransferFunds";
-import ReferralPage from "./routes/dashboard/ReferralPage";
-import Status from "./routes/dashboard/Status";
 import ReceiptLayout from "./routes/layout/ReceiptLayout";
-import WithdrawFunds from "./routes/dashboard/WithdrawFunds";
-import AddFunds from "./routes/dashboard/AddFunds";
-import StaticAccount from "./routes/dashboard/StaticAccount";
-import Airtime from "./components/dashboard/services/airtime/Airtime";
-import Data from "./components/dashboard/services/data/Data";
-import Electricity from "./components/dashboard/services/electricity/Electricity";
-import Betting from "./components/dashboard/services/betting/Betting";
-import TVCable from "./components/dashboard/services/tv-cable/TVCable";
-import Epin from "./components/dashboard/services/epin/Epin";
-import SettingsPage from "./routes/dashboard/SettingsPage";
-import AccountSettings from "./components/dashboard/settings/AccountSettings";
-import SecuritySettings from "./components/dashboard/settings/SecuritySettings";
-import BankInfoSettings from "./components/dashboard/settings/BankInfoSettings";
-import Support from "./components/dashboard/settings/Support";
-import Faqs from "./components/dashboard/settings/Faqs";
-import History from "./routes/dashboard/History";
-import TxnHistoryDetail from "./routes/dashboard/TxnHistoryDetail";
+import Login from "./routes/auth-pages/LogIn";
+import SignUp from "./routes/auth-pages/SignUp";
+import Dashboard from "./components/dashboard/main-page/Dashboard";
 import NotFoundPage from "./components/NotFoundPage";
-import TwoFAOtp from "./routes/auth-pages/TwoFAOtp";
-import { BiErrorCircle } from "react-icons/bi";
-import InternationalAirtime from "./components/dashboard/services/international-airtime/InternationalAirtime";
-import InternationalData from "./components/dashboard/services/international-data/InternationalData";
-import AirtimePrint from "./components/dashboard/services/airtime-print/AirtimePrint";
-import DataPrint from "./components/dashboard/services/data-print/DataPrint";
-import AirtimeCash from "./components/dashboard/services/airtime-cash/AirtimeCash";
-import Smm from "./components/dashboard/services/smm/Smm";
+
+// Lazy-loaded auth pages
+const TwoFAOtp = lazy(() => import("./routes/auth-pages/TwoFAOtp"));
+const VerifyPhone = lazy(() => import("./routes/auth-pages/VerifyPhone"));
+const UserDetails = lazy(() => import("./routes/auth-pages/UserDetails"));
+const VerifyEmail = lazy(() => import("./routes/auth-pages/VerifyEmail"));
+const SetTransactionPin = lazy(() => import("./routes/auth-pages/SetTransactionPin"));
+const ResetPassword = lazy(() => import("./routes/auth-pages/ResetPassword"));
+
+// Lazy-loaded dashboard pages
+const History = lazy(() => import("./routes/dashboard/History"));
+const TxnHistoryDetail = lazy(() => import("./routes/dashboard/TxnHistoryDetail"));
+const NotificationsPage = lazy(() => import("./routes/dashboard/NotificationsPage"));
+const AffiliatePage = lazy(() => import("./routes/dashboard/AffiliatePage"));
+const TransferFunds = lazy(() => import("./routes/dashboard/TransferFunds"));
+const ReferralPage = lazy(() => import("./routes/dashboard/ReferralPage"));
+const Status = lazy(() => import("./routes/dashboard/Status"));
+const WithdrawFunds = lazy(() => import("./routes/dashboard/WithdrawFunds"));
+const AddFunds = lazy(() => import("./routes/dashboard/AddFunds"));
+const StaticAccount = lazy(() => import("./routes/dashboard/StaticAccount"));
+const SettingsPage = lazy(() => import("./routes/dashboard/SettingsPage"));
+
+// Lazy-loaded settings tabs
+const AccountSettings = lazy(() => import("./components/dashboard/settings/AccountSettings"));
+const SecuritySettings = lazy(() => import("./components/dashboard/settings/SecuritySettings"));
+const BankInfoSettings = lazy(() => import("./components/dashboard/settings/BankInfoSettings"));
+const Support = lazy(() => import("./components/dashboard/settings/Support"));
+const Faqs = lazy(() => import("./components/dashboard/settings/Faqs"));
+
+// Lazy-loaded bill payment & services
+const Airtime = lazy(() => import("./components/dashboard/services/airtime/Airtime"));
+const Data = lazy(() => import("./components/dashboard/services/data/Data"));
+const Electricity = lazy(() => import("./components/dashboard/services/electricity/Electricity"));
+const Betting = lazy(() => import("./components/dashboard/services/betting/Betting"));
+const TVCable = lazy(() => import("./components/dashboard/services/tv-cable/TVCable"));
+const Epin = lazy(() => import("./components/dashboard/services/epin/Epin"));
+const Smm = lazy(() => import("./components/dashboard/services/smm/Smm"));
+const InternationalAirtime = lazy(() => import("./components/dashboard/services/international-airtime/InternationalAirtime"));
+const InternationalData = lazy(() => import("./components/dashboard/services/international-data/InternationalData"));
+const AirtimePrint = lazy(() => import("./components/dashboard/services/airtime-print/AirtimePrint"));
+const DataPrint = lazy(() => import("./components/dashboard/services/data-print/DataPrint"));
+const AirtimeCash = lazy(() => import("./components/dashboard/services/airtime-cash/AirtimeCash"));
 
 function App() {
   const router = createBrowserRouter([
@@ -188,6 +194,10 @@ function App() {
         {
           path: "referral",
           element: <ReferralPage />
+        },
+        {
+          path: "referrals",
+          element: <Navigate to="/dashboard/referral" replace />
         },
         {
           path: "notifications",

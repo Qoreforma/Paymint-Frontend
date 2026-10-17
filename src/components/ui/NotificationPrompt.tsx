@@ -12,8 +12,9 @@ export const NotificationPrompt = () => {
     if (!isSupported) return;
 
     // Only show if user is logged in, permission is strictly "default" (not asked yet),
-    // and they haven't dismissed it this session.
-    if (user && permission === "default" && !sessionStorage.getItem("pushPromptDismissed")) {
+    // and they haven't dismissed it previously.
+    const isDismissed = localStorage.getItem("paymint_push_dismissed") || sessionStorage.getItem("pushPromptDismissed");
+    if (user && permission === "default" && !isDismissed) {
       // Delay prompt slightly so it's not too aggressive
       const timer = setTimeout(() => setShowPrompt(true), 3000);
       return () => clearTimeout(timer);
@@ -24,10 +25,13 @@ export const NotificationPrompt = () => {
 
   const handleAllow = async () => {
     await requestPermissionAndGetToken();
+    localStorage.setItem("paymint_push_dismissed", "true");
+    sessionStorage.setItem("pushPromptDismissed", "true");
     setShowPrompt(false);
   };
 
   const handleDismiss = () => {
+    localStorage.setItem("paymint_push_dismissed", "true");
     sessionStorage.setItem("pushPromptDismissed", "true");
     setShowPrompt(false);
   };

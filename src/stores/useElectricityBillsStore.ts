@@ -45,6 +45,7 @@ export type TElectricityTransaction = {
 type TElectricityBills = {
     step: number;
     provider: string,
+    providerName: string,
     meterNumber: string,
     meterType: string,
     quantity: string,
@@ -58,6 +59,7 @@ type TElectricityBills = {
 const initialState = {
     step: 1,
     provider: "",
+    providerName: "",
     meterNumber: "",
     meterType: "prepaid",
     quantity: "",

@@ -31,6 +31,11 @@ const TYPE_LABELS: Record<string, string> = {
   cable: "Cable TV",
   electricity: "Electricity",
   betting: "Betting",
+  epin: "Education E-PIN",
+  smm: "SMM Orders",
+  airtime_cash: "Airtime Cash",
+  data_print: "Data Print",
+  airtime_print: "Airtime Print",
 };
 
 const STATUS_FILTERS = [

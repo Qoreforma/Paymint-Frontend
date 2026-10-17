@@ -8,7 +8,7 @@ import {
 
 
 import AuthLogomark from "@/assets/auth/AuthLogomark.png";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import CustomButton from "@/components/CustomButton";
 import SuccessMessage from "@/components/SuccessMessage";
 import { useMutation } from "@tanstack/react-query";
@@ -83,7 +83,7 @@ const SetTransactionPin = () => {
         </div>
         <form onSubmit={handleSubmit} className="max-w-[410px] mt-8 w-full">
             <InputOTP 
-                pattern={REGEXP_ONLY_DIGITS_AND_CHARS} 
+                pattern={REGEXP_ONLY_DIGITS} 
                 maxLength={4}
                 value={txnPin}
                 onChange={(value) => SetTxnPin(value)}

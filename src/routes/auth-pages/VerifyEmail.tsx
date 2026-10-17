@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/input-otp"
 
 import AuthLogomark from "@/assets/auth/AuthLogomark.png"
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp"
+import { REGEXP_ONLY_DIGITS } from "input-otp"
 import { FormEvent, useRef, useState } from "react"
 import { useAuth } from "@/context/AuthContext"
 import { useMutation } from "@tanstack/react-query"
@@ -130,7 +130,7 @@ const VerifyEmail = () => {
         </div>
         <form onSubmit={handleSubmit} className="w-full max-w-[410px] mt-8">
             <InputOTP 
-                pattern={REGEXP_ONLY_DIGITS_AND_CHARS} 
+                pattern={REGEXP_ONLY_DIGITS} 
                 maxLength={6}
                 value={otp}
                 onChange={(value) => setOtp(value)}

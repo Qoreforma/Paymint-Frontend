@@ -26,7 +26,12 @@ const AirtimeCash = () => {
   });
 
   const {step, reset, update, provider, phone, amount} = useServiceFlowStore();
-  useServiceURLSync({ step, updateStep: (s) => update({ step: s }), reset });
+  useServiceURLSync({
+    step,
+    updateStep: (s) => update({ step: s }),
+    reset,
+    isValidStep: (s) => s < 2 || Boolean(provider && phone && amount),
+  });
 
   const CurrentComponent = AirtimePurchaseSteps[step - 1]?.component || AirtimePurchaseSteps[0].component;
   const airtimeCashStatus = servicesStatus?.airtime_cash;

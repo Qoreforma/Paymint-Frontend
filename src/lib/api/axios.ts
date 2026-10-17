@@ -1,12 +1,17 @@
 import axios from "axios";
+import { queryClient } from "../queryClient";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "https://paymint.qoreformasolutionlimited.com.ng/api/v1"
+    baseURL: import.meta.env.VITE_API_BASE_URL || "/api/v1"
 });
 
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("accessToken");
     if(token) config.headers.Authorization = `Bearer ${token}`;
+    // Guard against hanging read requests without timing out critical debit mutations
+    if(config.method?.toLowerCase() === "get" && !config.timeout) {
+        config.timeout = 30000;
+    }
     return config;
 })
 
@@ -15,7 +20,6 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
     const requestUrl = error.config?.url;
-    // const hasAuthHeader = !!error.config?.headers?.Authorization;
 
     if (
       status === 401 &&
@@ -24,8 +28,12 @@ api.interceptors.response.use(
       !requestUrl?.includes("/auth/change-password") &&
       !requestUrl?.includes("/auth/social/google/signin") 
     ) {
-      console.log("redirect to login")
-      // Token expired or invalid
+      // Token expired or invalid: clear session and cached queries
+      try {
+        queryClient.clear();
+      } catch {
+        // fail-safe
+      }
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");

@@ -58,12 +58,6 @@ const AddNewBank = ({showBankInfo}: {showBankInfo: () => void}) => {
 
     const {mutate, isPending: isVerifying, data: verifiedAccount, error: verAccError} = useMutation<TAccountVerResponse, AxiosError, verifyBankAccountPayload>({
         mutationFn: verifyBankAccount,
-        onSuccess: (data) => {
-            console.log(data)
-        },
-        onError: (error: AxiosError) => {
-            console.log({error})
-        }
     })
 
     const {mutate: addAccount, isPending: addingAccount} = useMutation({
@@ -73,9 +67,8 @@ const AddNewBank = ({showBankInfo}: {showBankInfo: () => void}) => {
         showBankInfo()
       },
       onError: (error: AxiosError) => {
-        console.log({error})
         const errData = error.response?.data as { message?: string };
-        if(errData.message){
+        if(errData?.message){
             return toast.error(errData.message)
         }
         toast.error("Something went wrong, please try again")
@@ -95,10 +88,10 @@ const AddNewBank = ({showBankInfo}: {showBankInfo: () => void}) => {
 
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
-        if(accountNumber && accountNumber.length >= 8 && selectedBank){
+        if(accountNumber && accountNumber.length === 10 && selectedBank){
             mutate({bankCode: selectedBank.bankCode, accountNumber})
         }
-    }, 1000);
+    }, 400);
     
         return () => clearTimeout(delayDebounce)
     }, [mutate, accountNumber, selectedBank])

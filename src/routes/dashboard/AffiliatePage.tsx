@@ -13,11 +13,21 @@ import { useAuth } from "@/context/AuthContext";
 import { SpinRewardBanner } from "@/components/dashboard/rewards/SpinRewardBanner";
 import { SpinHistorySection } from "@/components/dashboard/rewards/SpinHistorySection";
 import TierProgressCard from "@/components/dashboard/rewards/TierProgressCard";
+import ReferralRulesCard from "@/components/dashboard/affiliate/ReferralRulesCard";
+import { getUser } from "@/lib/api/authApi";
 
 const AffiliatePage = () => {
   const [copied, setCopied] = useState(false);
 
-  const {user} = useAuth()
+  const {user: authUser} = useAuth();
+
+  const { data: profile } = useQuery({
+      queryKey: ["profile"],
+      queryFn: getUser,
+      staleTime: 1000 * 60 * 5,
+  });
+
+  const user = profile || authUser;
 
 //   upline data
     const {
@@ -27,8 +37,6 @@ const AffiliatePage = () => {
         queryKey: ["upline"],
         queryFn: getUpline,
     })
-
-    console.log({uplineData})
 
     // downlines data
     const {
@@ -48,7 +56,7 @@ const AffiliatePage = () => {
       }, 2000)
   }
 
-  if(isLoading || fetchingUpline) return <Loader className="w-full h-full max-md:hidden" />;
+  if(isLoading || fetchingUpline) return <Loader className="w-full h-full" />;
 
   if(!data) return <EmptyState text="Something went wrong, please refresh" />
 
@@ -88,6 +96,9 @@ const AffiliatePage = () => {
                 }
             </div>
         </div>
+
+        {/* Influencer or Regular Referral Rules Card */}
+        <ReferralRulesCard user={user} />
 
         <DownlinesTable referralData={data?.data} />
 

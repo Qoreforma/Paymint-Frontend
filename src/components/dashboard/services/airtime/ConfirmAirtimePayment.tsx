@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useState, useCallback } from "react"
 
 import CustomButton from "@/components/CustomButton"
 import BackButton from "@/components/Authentication/BackButton"
@@ -27,24 +27,27 @@ const ConfirmAirtimePayment = () => {
   const {mutate, isPending} = useMutation({
       mutationFn: buyAirtime,
       onSuccess: (data) => {
-        console.log({data})
+        SetPaymenTPin("");
+        setShowPinForm(false);
         update({step: step+1, txnResult: data});
       },
       onError: (error: AxiosError) => {
-        console.log({error})
-          update({step: step+1, txnResult: null});
-          const errData = error.response?.data as { message?: string };
-          if(errData.message){
-              return toast.error(errData.message)
-          }
-          toast.error("Something went wrong, please try again")
+        SetPaymenTPin("");
+        setShowPinForm(false);
+        update({step: step+1, txnResult: null});
+        const errData = error.response?.data as { message?: string };
+        if(errData?.message){
+            return toast.error(errData.message)
+        }
+        toast.error("Something went wrong, please try again")
       }
   })
 
-  const handleSubmit = (e?: FormEvent) => {
+  const handleSubmit = useCallback((e?: FormEvent) => {
       if (e) e.preventDefault();
+      if (isPending) return;
       mutate({amount, phone, pin: paymenTPin, provider: provider, useCashback: useCashback })
-  }
+  }, [isPending, mutate, amount, phone, paymenTPin, provider, useCashback]);
 
   return (
     <div className="min-h-full flex md:items-center justify-center relative">
@@ -80,7 +83,10 @@ const ConfirmAirtimePayment = () => {
 
         <EnterPin 
             isOpen={showPinForm} 
-            onClose={() => setShowPinForm(false)} 
+            onClose={() => {
+                SetPaymenTPin("");
+                setShowPinForm(false);
+            }} 
             disable={isPending} 
             handleSubmit={handleSubmit} 
             value={paymenTPin} 

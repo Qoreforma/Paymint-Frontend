@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useCallback } from "react";
 import { formatAmount } from "@/lib/utils";
 import CustomButton from "@/components/CustomButton";
 import BackButton from "@/components/Authentication/BackButton";
@@ -39,10 +39,12 @@ const ConfirmSmmPayment = () => {
   const { mutate, isPending } = useMutation({
     mutationFn: placeSmmOrder,
     onSuccess: (data: any) => {
+      setPaymentPin("");
       setShowPinForm(false);
       update({ step: step + 1, txnResult: data });
     },
     onError: (error: AxiosError) => {
+      setPaymentPin("");
       setShowPinForm(false);
       const errData = error.response?.data as { message?: string };
       const failureMessage =
@@ -56,19 +58,20 @@ const ConfirmSmmPayment = () => {
     },
   });
 
-  const handleSubmit = (e?: FormEvent) => {
+  const handleSubmit = useCallback((e?: FormEvent) => {
     if (e) e.preventDefault();
+    if (isPending) return;
     mutate({
       productId,
       link,
-      quantity: Number(quantity),
+      quantity: Number(quantity) || 0,
       pin: paymentPin,
     });
-  };
+  }, [isPending, mutate, productId, link, quantity, paymentPin]);
 
   return (
     <div className="min-h-full flex md:items-center justify-center relative">
-      <section className="w-full max-w-[420px] mx-auto flex flex-col">
+      <section className="w-full max-w-[420px] mx-auto flex flex-col max-md:justify-center">
         <BackButton
           disabled={isPending}
           icon={isMobile}
@@ -76,75 +79,97 @@ const ConfirmSmmPayment = () => {
           className="mb-6"
         />
 
-        <div className="mb-6">
-          <h1 className="text-[var(--aqua)] font-display font-semibold text-2xl">
+        <div className="bg-white border border-[#F0F2F5] rounded-2xl p-6 shadow-sm">
+          <h1 className="text-[var(--aqua)] font-medium text-2xl text-center">
             Confirm SMM Order
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Review the details of your social media order before completing the payment.
+          <p className="text-[#717171] text-sm text-center mt-1">
+            Review your order details before completing payment
           </p>
-        </div>
 
-        {/* Order Details Card */}
-        <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 flex flex-col gap-3.5 mb-6">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-slate-500">Platform</span>
-            <span className="font-semibold text-slate-800">{platformName}</span>
-          </div>
-          <div className="flex justify-between items-start text-sm border-t border-slate-100 pt-3">
-            <span className="text-slate-500">Service</span>
-            <span className="font-semibold text-slate-800 text-right max-w-[220px] line-clamp-2">
-              {productName}
+          <div className="my-6 p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+            <span className="text-xs text-[#667085] uppercase tracking-wider font-medium">
+              Total Charge
             </span>
-          </div>
-          <div className="flex justify-between items-center text-sm border-t border-slate-100 pt-3">
-            <span className="text-slate-500">Target Link</span>
-            <span className="font-semibold text-blue-600 truncate max-w-[200px]" title={link}>
-              {link}
+            <span className="text-2xl font-bold text-[#101828] mt-1">
+              {formatAmount(amount)}
             </span>
+            <div className="flex items-center gap-1.5 mt-2 text-xs text-[#475467]">
+              <Wallet className="size-3.5 text-[var(--aqua)]" />
+              <span>
+                Wallet Balance:{" "}
+                <strong
+                  className={
+                    isBalanceInsufficient ? "text-red-500" : "text-emerald-600"
+                  }
+                >
+                  {formatAmount(walletBalance)}
+                </strong>
+              </span>
+            </div>
           </div>
-          <div className="flex justify-between items-center text-sm border-t border-slate-100 pt-3">
-            <span className="text-slate-500">Quantity</span>
-            <span className="font-semibold text-slate-800">{Number(quantity).toLocaleString()}</span>
+
+          {isBalanceInsufficient && (
+            <div className="mb-5 p-3 rounded-lg bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-700">
+              <AlertCircle className="size-4 shrink-0 text-red-500 mt-0.5" />
+              <div>
+                <p className="font-semibold">Insufficient Balance</p>
+                <p className="mt-0.5 text-red-600">
+                  Please top up your wallet before proceeding with this order.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between items-center py-2 border-b border-slate-100">
+              <span className="text-[#667085]">Platform</span>
+              <span className="font-medium text-[#101828] capitalize">
+                {platformName || "-"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-slate-100">
+              <span className="text-[#667085]">Service</span>
+              <span
+                className="font-medium text-[#101828] text-right max-w-[220px] truncate"
+                title={productName}
+              >
+                {productName || "-"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-slate-100">
+              <span className="text-[#667085]">Quantity</span>
+              <span className="font-medium text-[#101828]">
+                {quantity.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex flex-col py-2 border-b border-slate-100 gap-1">
+              <span className="text-[#667085]">Target Link</span>
+              <span
+                className="font-medium text-[#101828] text-xs break-all bg-slate-50 p-2 rounded-md font-mono"
+                title={link}
+              >
+                {link || "-"}
+              </span>
+            </div>
           </div>
-          <div className="flex justify-between items-center text-sm border-t border-slate-200 pt-3 font-semibold">
-            <span className="text-slate-700">Total Amount</span>
-            <span className="text-blue-600 text-base">{formatAmount(amount)}</span>
-          </div>
+
+          <CustomButton
+            disabled={isPending || isBalanceInsufficient}
+            onClick={() => setShowPinForm(true)}
+            className="w-full mt-6 h-12 text-base"
+          >
+            Proceed - <span className="opacity-75">Enter PIN</span>
+          </CustomButton>
         </div>
-
-        {/* Wallet Balance Card */}
-        <div className="flex items-center justify-between p-3.5 rounded-xl bg-blue-50/50 border border-blue-100/80 mb-6">
-          <div className="flex items-center gap-2.5">
-            <Wallet className="size-4 text-blue-600" />
-            <span className="text-xs font-medium text-slate-600">Available Wallet Balance</span>
-          </div>
-          <span className="text-xs font-bold text-slate-800 font-mono">
-            {formatAmount(walletBalance)}
-          </span>
-        </div>
-
-        {isBalanceInsufficient && (
-          <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs mb-6">
-            <AlertCircle className="size-4 shrink-0 mt-0.5" />
-            <span>
-              Your wallet balance is insufficient for this transaction. Please fund your wallet to proceed.
-            </span>
-          </div>
-        )}
-
-        <CustomButton
-          disabled={isPending || isBalanceInsufficient}
-          onClick={() => setShowPinForm(true)}
-          className="w-full"
-        >
-          Confirm and Pay {formatAmount(amount)}
-        </CustomButton>
       </section>
 
       <EnterPin
         isOpen={showPinForm}
-        onClose={() => setShowPinForm(false)}
+        onClose={() => {
+          setPaymentPin("");
+          setShowPinForm(false);
+        }}
         disable={isPending}
         handleSubmit={handleSubmit}
         value={paymentPin}

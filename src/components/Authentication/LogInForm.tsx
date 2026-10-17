@@ -41,16 +41,28 @@ const LogInForm = () => {
             navigate("/dashboard")
         },
         onError: (error: AxiosError, variables) => {
-            if (error?.response?.status === 403) {
-                navigate(`/auth/verify-email`, {
+            const errData = error.response?.data as { message?: string; error?: string };
+            const errorCode = errData?.error;
+            const errorMessage = errData?.message || "";
+
+            // Only navigate to verify-email if 403 explicitly indicates unverified email.
+            // Suspended or inactive accounts must see the error message toast instead of being redirected.
+            const isUnverifiedEmail = error?.response?.status === 403 && (
+                errorCode === "EMAIL_NOT_VERIFIED" ||
+                errorMessage.toLowerCase().includes("verify your email") ||
+                errorMessage.toLowerCase().includes("email not verified")
+            );
+
+            if (isUnverifiedEmail) {
+                return navigate(`/auth/verify-email`, {
                     state: { email: variables.payload.email }
-                })
+                });
             }
-            const errData = error.response?.data as { message?: string };
-            if (errData.message) {
-                return toast.error(errData.message)
+
+            if (errData?.message) {
+                return toast.error(errData.message);
             }
-            toast.error("Something went wrong, please try again")
+            toast.error("Something went wrong, please try again");
         }
     })
 

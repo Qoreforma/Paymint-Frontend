@@ -317,19 +317,40 @@ export const otherServices = [
 
 
 import RadioIcon from "@/assets/dashboard/radio-mobile.svg";
+import Rss from "@/assets/dashboard/rss.svg";
+import Globe from "@/assets/dashboard/globe.svg";
 
 export const otherServicesMobile = [
     {
-        id: 5,
-        href: "/dashboard/services/mobile-money",
-        title: "Payment",
-        subTitle: "Make mobile payments easily.",
+        id: 1,
+        href: "/dashboard/services/airtime-cash",
+        title: "Airtime to Cash",
+        subTitle: "Convert excess airtime to cash.",
+        icon: Rss
+    },
+    {
+        id: 2,
+        href: "/dashboard/services/airtime-print",
+        title: "Airtime Print",
+        subTitle: "Generate and print airtime recharge pins.",
+        icon: Rss
+    },
+    {
+        id: 3,
+        href: "/dashboard/services/data-print",
+        title: "Data Print",
+        subTitle: "Generate and print data recharge pins.",
+        icon: Globe
+    },
+    {
+        id: 4,
+        href: "/dashboard/transfer-funds",
+        title: "Transfer Funds",
+        subTitle: "Send money to Paymint users or bank accounts.",
         icon: RadioIcon
     },
 ]
 
-import Rss from "@/assets/dashboard/rss.svg";
-import Globe from "@/assets/dashboard/globe.svg";
 import Zap from "@/assets/dashboard/zap.svg";
 import HardDrive from "@/assets/dashboard/hard-drive.svg";
 import Tv from "@/assets/dashboard/tv.svg";

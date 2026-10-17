@@ -75,6 +75,23 @@ export interface UplineData {
 }
 
 
+export interface ReferralStats {
+  totalReferrals: number;
+  qualifiedReferrals: number;
+  paidReferrals: number;
+  pendingReferrals: number;
+  totalEarned: number;
+  paidAmount: number;
+  pendingAmount: number;
+}
+
+export interface ReferralTerm {
+  _id?: string;
+  title: string;
+  body: string;
+  slug?: string;
+}
+
 export const getReferrals = async () => {
     const response = await api.get("/referrals");
     return response.data;
@@ -83,4 +100,15 @@ export const getReferrals = async () => {
 export const getUpline = async () => {
     const response = await api.get("/referrals/upline");
     return response.data?.data;
+}   
+
+export const getReferralStats = async (): Promise<ReferralStats> => {
+    const response = await api.get("/referrals/stats");
+    return response.data?.data;
+}
+
+export const getReferralTerms = async (): Promise<ReferralTerm[]> => {
+    const response = await api.get("/referrals/terms");
+    const data = response.data?.data;
+    return Array.isArray(data) ? data : data ? [data] : [];
 }   

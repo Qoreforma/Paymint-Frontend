@@ -39,7 +39,12 @@ const Betting = () => {
     
     const {step, reset, update, provider, user, amount} = useBettingStore();
     
-    useServiceURLSync({ step, updateStep: (s) => update({ step: s }), reset });
+    useServiceURLSync({
+        step,
+        updateStep: (s) => update({ step: s }),
+        reset,
+        isValidStep: (s) => s < 2 || Boolean(provider && user && amount),
+    });
 
     if (isLoading) return <Loader className="w-full h-full" />;
 

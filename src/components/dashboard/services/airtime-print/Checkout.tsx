@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import BackButton from "@/components/Authentication/BackButton";
 import CustomButton from "@/components/CustomButton";
 import { Loader2 } from "lucide-react";
@@ -17,15 +17,18 @@ const Checkout = () => {
     const { mutate, isPending } = useMutation({
         mutationFn: buyAirtimeEpin,
         onSuccess: (data) => {
+            setPin("");
             update({ txnResult: data, step: step + 1 });
             queryClient.invalidateQueries({ queryKey: ["wallet-balance"] });
         },
         onError: (err: AxiosError<{message: string}>) => {
+            setPin("");
             toast.error(err.response?.data?.message || "Purchase failed. Please try again.");
         }
     });
 
-    const handlePurchase = () => {
+    const handlePurchase = useCallback(() => {
+        if (isPending) return;
         if (!pin || pin.length < 4) {
             toast.error("Please enter a valid PIN");
             return;
@@ -36,7 +39,7 @@ const Checkout = () => {
             quantity,
             pin
         });
-    };
+    }, [isPending, pin, network, denomination, quantity, mutate]);
 
     return (
         <section className="w-full max-w-[360px] mx-auto pb-5">
@@ -76,7 +79,7 @@ const Checkout = () => {
             <div className="mt-8">
                 <label className="text-sm text-[#344054] font-medium block mb-2 text-center">Enter Transaction PIN</label>
                 <div className="flex justify-center">
-                    <EnterPin value={pin} onValueChange={(v) => setPin(v)} disable={isPending} handleSubmit={handlePurchase} />
+                    <EnterPin inline value={pin} onValueChange={setPin} disable={isPending} handleSubmit={handlePurchase} />
                 </div>
             </div>
 

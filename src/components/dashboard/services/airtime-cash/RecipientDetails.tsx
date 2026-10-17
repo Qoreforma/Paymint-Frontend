@@ -17,6 +17,7 @@ import { motion } from "framer-motion"
 
 import NetworkProviderPicker from "../shared/NetworkProviderPicker"
 import { useAuth } from "@/context/AuthContext"
+import DOMPurify from "dompurify"
 
 export type VerifyPhoneNoPayload = { phone: string; network: string };
 export type phoneNoVerificationResponse = {
@@ -185,7 +186,7 @@ const RecipientDetails = () => {
                         <p className="text-sm font-semibold text-amber-800 mb-1">How it works</p>
                         <div 
                             className="text-sm text-amber-700 leading-relaxed" 
-                            dangerouslySetInnerHTML={{ __html: adminNotes }} 
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(adminNotes) }} 
                         />
                     </div>
                 </motion.div>

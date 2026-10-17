@@ -247,7 +247,7 @@ function SecurityRow({
         </div>
         <ChevronRight className="size-4 text-slate-300 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all shrink-0" />
         {/* Invisible overlay to capture the trigger */}
-        <div className="absolute inset-0 opacity-0">{trigger}</div>
+        <div className="absolute inset-0 opacity-0 [&_button]:w-full [&_button]:h-full [&_button]:cursor-pointer cursor-pointer z-10">{trigger}</div>
       </div>
     );
   }

@@ -5,19 +5,22 @@ interface UseServiceURLSyncProps {
     step: number;
     updateStep: (step: number) => void;
     reset: () => void;
+    isValidStep?: (step: number) => boolean;
 }
 
-export const useServiceURLSync = ({ step, updateStep, reset }: UseServiceURLSyncProps) => {
+export const useServiceURLSync = ({ step, updateStep, reset, isValidStep }: UseServiceURLSyncProps) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const hasInitialized = useRef(false);
     const lastWrittenStep = useRef<number | null>(null);
     const updateStepRef = useRef(updateStep);
     const resetRef = useRef(reset);
+    const isValidStepRef = useRef(isValidStep);
 
     // Keep callbacks fresh in ref to avoid triggering effects on new function instances
     useEffect(() => {
         updateStepRef.current = updateStep;
         resetRef.current = reset;
+        isValidStepRef.current = isValidStep;
     });
 
     // 1. Initial Mount: sync URL to Store or reset (runs ONCE on mount)
@@ -27,10 +30,18 @@ export const useServiceURLSync = ({ step, updateStep, reset }: UseServiceURLSync
             const urlStep = searchParams.get("step");
             if (urlStep && !isNaN(Number(urlStep))) {
                 const parsedStep = Number(urlStep);
-                if (parsedStep !== step) {
+                const isTargetValid = parsedStep === 1 || (isValidStepRef.current ? isValidStepRef.current(parsedStep) : true);
+                if (parsedStep > 1 && !isTargetValid) {
+                    resetRef.current();
+                    lastWrittenStep.current = 1;
+                    updateStepRef.current(1);
+                    setSearchParams({ step: "1" }, { replace: true });
+                } else if (parsedStep !== step) {
                     updateStepRef.current(parsedStep);
+                    lastWrittenStep.current = parsedStep;
+                } else {
+                    lastWrittenStep.current = parsedStep;
                 }
-                lastWrittenStep.current = parsedStep;
             } else {
                 resetRef.current();
                 lastWrittenStep.current = 1;
@@ -61,7 +72,13 @@ export const useServiceURLSync = ({ step, updateStep, reset }: UseServiceURLSync
             const urlStep = searchParams.get("step");
             if (urlStep && !isNaN(Number(urlStep))) {
                 const parsedStep = Number(urlStep);
-                if (parsedStep !== step && lastWrittenStep.current !== parsedStep) {
+                const isTargetValid = parsedStep === 1 || (isValidStepRef.current ? isValidStepRef.current(parsedStep) : true);
+                if (parsedStep > 1 && !isTargetValid) {
+                    resetRef.current();
+                    lastWrittenStep.current = 1;
+                    updateStepRef.current(1);
+                    setSearchParams({ step: "1" }, { replace: true });
+                } else if (parsedStep !== step && lastWrittenStep.current !== parsedStep) {
                     lastWrittenStep.current = parsedStep;
                     updateStepRef.current(parsedStep);
                 }

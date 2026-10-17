@@ -20,7 +20,12 @@ const TVCable = () => {
 
     const {step, reset, update, provider, smartCardNo, package: storePackage} = useTVCableStore();
     
-    useServiceURLSync({ step, updateStep: (s) => update({ step: s }), reset });
+    useServiceURLSync({
+        step,
+        updateStep: (s) => update({ step: s }),
+        reset,
+        isValidStep: (s) => s < 2 || Boolean(provider && smartCardNo && storePackage),
+    });
 
     if (isLoading) return <Loader className="w-full h-full" />;
 

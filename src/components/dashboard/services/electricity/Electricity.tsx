@@ -12,6 +12,9 @@ import { useServiceURLSync } from "@/hooks/useServiceURLSync";
 import ServiceLayout from "../shared/ServiceLayout";
 import { formatAmount } from "@/lib/utils";
 
+import { fetchElectricityProviders } from "@/lib/api/dashboard-apis/servicesApis";
+import { ElectricityProvider } from "./RecipientDetails";
+
 const Electricity = () => {    
     const { data: servicesStatus, isLoading } = useQuery<ServicesData, Error>({
         queryKey: ["servicesStatus"],
@@ -35,9 +38,22 @@ const Electricity = () => {
       },
     ], [])
 
-    const {step, reset, update, provider, meterType, meterNumber, quantity} = useElectricityBillsStore();
+    const {step, reset, update, provider, providerName, meterType, meterNumber, quantity} = useElectricityBillsStore();
   
-    useServiceURLSync({ step, updateStep: (s) => update({ step: s }), reset });
+    useServiceURLSync({
+        step,
+        updateStep: (s) => update({ step: s }),
+        reset,
+        isValidStep: (s) => s < 2 || Boolean(provider && meterNumber && quantity),
+    });
+
+    const { data: providers } = useQuery<ElectricityProvider[], Error>({
+        queryKey: ["electricity-providers"],
+        queryFn: fetchElectricityProviders,
+    });
+
+    const selectedProvider = providers?.find((prov) => String(prov.id) === String(provider));
+    const providerDisplayName = providerName || selectedProvider?.name || (provider ? provider.toUpperCase() : "-");
 
     const CurrentComponent = ElectricityBillsSteps[step - 1]?.component || ElectricityBillsSteps[0].component;
 
@@ -47,7 +63,7 @@ const Electricity = () => {
 
     const summaryData = {
       "Service": "Electricity Bill",
-      "Provider": provider ? provider.toUpperCase() : "-",
+      "Provider": providerDisplayName,
       "Meter Type": meterType ? meterType.charAt(0).toUpperCase() + meterType.slice(1) : "-",
       "Meter Number": meterNumber ? meterNumber : "-",
       "Amount": quantity ? formatAmount(Number(quantity)) : formatAmount(0),

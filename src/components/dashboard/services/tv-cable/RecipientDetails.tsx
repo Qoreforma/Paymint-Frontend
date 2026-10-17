@@ -67,12 +67,6 @@ const RecipientDetails = () => {
 
     const {mutate, isPending: isVerifying, data: verifiedCard, error: verifyError} = useMutation<SmartCardNoVerificationResponse, AxiosError, VerifySmartCardPayload>({
         mutationFn: verifySmartcardNumber,
-        onSuccess: (data) => {
-            console.log(data)
-        },
-        onError: (error: AxiosError) => {
-            console.log({error})
-        }
     })
 
     let verifyErrData: { message?: string } | undefined;
@@ -97,7 +91,7 @@ const RecipientDetails = () => {
         if(smartCardNo && smartCardNo.length >= 10 && provider){
             mutate({provider: provider.code, number: smartCardNo})
         }
-        }, 1000);
+        }, 400);
     
         return () => clearTimeout(delayDebounce)
     }, [smartCardNo, mutate, provider])

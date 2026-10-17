@@ -43,9 +43,15 @@ const Data = () => {
         },
     ], [])
     
+    const { user } = useAuth();
     const {step, reset, update, provider, phone, amount, plan, dataPlans} = useServiceFlowStore();
 
-    useServiceURLSync({ step, updateStep: (s) => update({ step: s }), reset });
+    useServiceURLSync({
+        step,
+        updateStep: (s) => update({ step: s }),
+        reset,
+        isValidStep: (s) => s < 2 || Boolean(provider && phone && (plan || amount)),
+    });
 
     useEffect(() => {
         if (cashbackRules && cashbackRules.length > 0) {
@@ -59,7 +65,6 @@ const Data = () => {
 
     if (statusMsg) return <EmptyState showBackBtn={true} text={statusMsg} />;
     
-    const { user } = useAuth();
     const displayPhone = phone || (user?.phone ? convertToLocalPhoneNumber(user.phone) : "-");
 
     const selectedPlan = dataPlans?.find((p: any) => 

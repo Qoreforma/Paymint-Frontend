@@ -19,8 +19,6 @@ const txnId = searchParams.get("txnId");
         enabled: !!txnId,
     });
 
-    console.log({txnDetails, txnId})
-
   return (
     <>
       <DesktopReceipt fetchingDetails={fetchingDetails} txnDetails={txnDetails} />

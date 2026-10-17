@@ -2,8 +2,9 @@ import { ReferralData } from "@/lib/api/dashboard-apis/referralsApis"
 import { columns } from "./columns"
 import { DownlinesDataTable } from "./downlines-data-table"
 
-export default function DownlinesTable({referralData}: {referralData: ReferralData}) {
+export default function DownlinesTable({referralData}: {referralData?: ReferralData}) {
+  const referrals = referralData?.[0]?.referrals || [];
   return (
-      <DownlinesDataTable referralData={referralData} columns={columns} data={referralData[0].referrals} />
+      <DownlinesDataTable referralData={referralData || []} columns={columns} data={referrals} />
   )
 }

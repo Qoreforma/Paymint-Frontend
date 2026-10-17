@@ -39,12 +39,15 @@ export function DownlinesDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
   })
 
+    const totalCount = referralData?.[0]?.referrals?.length || 0;
+    const totalBonus = referralData?.[0]?.totalReferralBonusEarned || 0;
+
   return (
     <div className="rounded-xl bg-white border border-[#EAECF0] overflow-hidden w-full">
         <section className="bg-white h-[67px] px-6 flex items-center">
             <h1 className="text-lg text-[#101828] md:text-[#334054] font-medium">Downlines</h1>
-            <div className="bg-[var(--aqua)0D] rounded-2xl px-2 py-0.5 text-xs text-[var(--aqua)] font-medium ml-2">{referralData[0].referrals.length} user{referralData[0].referrals.length > 1 ? "s" : ""}</div>
-            <p className="text-[#344054] text-lg ml-auto max-md:hidden">All time earnings <span className="text-xl font-bold text-[var(--aqua)]">{formatAmount(referralData[0].totalReferralBonusEarned)}</span></p>
+            <div className="bg-[var(--aqua)0D] rounded-2xl px-2 py-0.5 text-xs text-[var(--aqua)] font-medium ml-2">{totalCount} user{totalCount === 1 ? "" : "s"}</div>
+            <p className="text-[#344054] text-lg ml-auto max-md:hidden">All time earnings <span className="text-xl font-bold text-[var(--aqua)]">{formatAmount(totalBonus)}</span></p>
         </section>
         <Table>
             <TableHeader className="bg-[#F9FAFB]">

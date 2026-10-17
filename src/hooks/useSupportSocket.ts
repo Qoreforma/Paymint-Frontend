@@ -17,15 +17,16 @@ const getSocketUrl = (): string => {
   if (import.meta.env.VITE_SOCKET_URL) {
     return import.meta.env.VITE_SOCKET_URL;
   }
-  const apiBase =
-    import.meta.env.VITE_API_BASE_URL ||
-    "https://paymint.qoreformasolutionlimited.com.ng/api/v1";
-  try {
-    const url = new URL(apiBase);
-    return url.origin;
-  } catch {
-    return "https://paymint.qoreformasolutionlimited.com.ng";
+  const apiBase = import.meta.env.VITE_API_BASE_URL;
+  if (apiBase) {
+    try {
+      const url = new URL(apiBase);
+      return url.origin;
+    } catch {
+      // ignore
+    }
   }
+  return typeof window !== "undefined" ? window.location.origin : "";
 };
 
 // ─── Typing indicator auto-clear timeout (ms) ───────────────────────────────

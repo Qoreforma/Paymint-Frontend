@@ -41,7 +41,12 @@ const InternationalData = () => {
 
     const {step, reset, update, phone, amount, country, provider, product} = usePurchaseIntDataStore();
 
-    useServiceURLSync({ step, updateStep: (s) => update({ step: s }), reset });
+    useServiceURLSync({
+        step,
+        updateStep: (s) => update({ step: s }),
+        reset,
+        isValidStep: (s) => s < 2 || Boolean(phone && provider && (amount || product)),
+    });
 
     if (isMobile === null) return null;
 

@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useState, useCallback } from "react"
 import { formatAmount } from "@/lib/utils";
 import CustomButton from "@/components/CustomButton"
 import BackButton from "@/components/Authentication/BackButton"
@@ -15,28 +15,32 @@ const ConfirmElectricityPayment = () => {
   const [showPinForm, setShowPinForm] = useState(false);
 
   const isMobile = useIsMobile();
-  const { update, step, meterNumber, quantity, provider, meterType } = useElectricityBillsStore();
+  const { update, step, meterNumber, quantity, provider, providerName, meterType } = useElectricityBillsStore();
 
   const {mutate, isPending} = useMutation({
       mutationFn: buyUnit,
       onSuccess: (data) => {
+        SetPaymenTPin("");
+        setShowPinForm(false);
         update({step: step+1, txnResult: data});
       },
       onError: (error: AxiosError) => {
-        console.log({error})
-          update({step: step+1, txnResult: null});
-          const errData = error.response?.data as { message?: string };
-          if(errData.message){
-              return toast.error(errData.message)
-          }
-          toast.error("Something went wrong, please try again")
+        SetPaymenTPin("");
+        setShowPinForm(false);
+        update({step: step+1, txnResult: null});
+        const errData = error.response?.data as { message?: string };
+        if(errData?.message){
+            return toast.error(errData.message)
+        }
+        toast.error("Something went wrong, please try again")
       }
   })
 
-  const handleSubmit = (e?: FormEvent) => {
+  const handleSubmit = useCallback((e?: FormEvent) => {
       if (e) e.preventDefault();
+      if (isPending) return;
       mutate({providerId: provider, type: meterType, number: meterNumber, amount: quantity, pin: paymenTPin})
-  }
+  }, [isPending, mutate, provider, meterType, meterNumber, quantity, paymenTPin]);
 
   return (
     <div className="min-h-full flex md:items-center justify-center relative">
@@ -45,13 +49,16 @@ const ConfirmElectricityPayment = () => {
             <h1 className="text-[var(--aqua)] font-medium text-2xl">Confirm purchase</h1>
             <p className="text-[#717171] md:mt-2">Confirm the details of this purchase</p>
 
-            <p className="text-[#101828] md:text-xl my-5 md:my-8">You are about to pay <span className="font-medium">{formatAmount(parseInt(quantity))}</span> for Electricity payment on <span className="font-medium">{meterNumber}</span>.</p>
+            <p className="text-[#101828] md:text-xl my-5 md:my-8">You are about to pay <span className="font-medium">{formatAmount(parseInt(quantity))}</span> for Electricity payment{providerName ? ` (${providerName})` : ""} on <span className="font-medium">{meterNumber}</span>.</p>
             <CustomButton disabled={isPending} onClick={() => setShowPinForm(true)} className="w-full mx-auto">Proceed - <span className="opacity-60">Confirm Purchase</span></CustomButton>
         </section>
 
         <EnterPin 
             isOpen={showPinForm} 
-            onClose={() => setShowPinForm(false)} 
+            onClose={() => {
+                SetPaymenTPin("");
+                setShowPinForm(false);
+            }} 
             disable={isPending} 
             handleSubmit={handleSubmit} 
             value={paymenTPin} 

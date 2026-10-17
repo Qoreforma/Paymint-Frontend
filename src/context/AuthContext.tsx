@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 // interface Wallet {
 //   type: string;
@@ -50,6 +51,19 @@ export type User = {
   refCode: string;
   referredBy: string | null;
 
+  userType?: "regular" | "influencer" | "micro-influencer" | "vendor";
+  influencerRules?: {
+    accountCompletion?: { isActive: boolean; rewardAmount: number };
+    firstBillPayment?: { isActive: boolean; rewardAmount: number };
+    transactionVolume?: { isActive: boolean; rewardAmount: number; targetVolume: number };
+    kycCompletion?: { isActive: boolean; rewardAmount: number };
+    refereeFirstTransaction?: {
+      isActive: boolean;
+      discountPercentage?: number;
+      cap?: number;
+    };
+  };
+
   bvnValidated: boolean;
   bvnVerified: boolean;
 
@@ -97,16 +111,20 @@ export const AuthContextProvider = ({children}: {children: React.ReactNode}) => 
         const storedAccessToken = localStorage.getItem("accessToken");
         const storedRefreshToken = localStorage.getItem("refreshToken");
 
-        console.log({user: JSON.parse(storedUser!), accessToken, refreshToken})
-
-        if(storedUser && storedAccessToken && storedRefreshToken){
-            setUser(JSON.parse(storedUser));
-            setAccessToken(storedAccessToken)
-            setRefreshToken(storedRefreshToken)
+        if (storedUser && storedAccessToken && storedRefreshToken) {
+            try {
+                setUser(JSON.parse(storedUser));
+                setAccessToken(storedAccessToken);
+                setRefreshToken(storedRefreshToken);
+            } catch {
+                localStorage.removeItem("user");
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+            }
         }
 
         setLoading(false);
-    }, [])
+    }, []);
 
     const setAuthData = (user: User, accessToken: string, refreshToken: string) => {
         setUser(user);
@@ -124,6 +142,7 @@ export const AuthContextProvider = ({children}: {children: React.ReactNode}) => 
         localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
+        queryClient.clear();
     };
 
     if(loading) return null

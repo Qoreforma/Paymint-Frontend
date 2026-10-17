@@ -41,7 +41,12 @@ const InternationalAirtime = () => {
 
     const {step, reset, update, phone, amount, country, provider} = usePurchaseIntAirtimeStore();
 
-    useServiceURLSync({ step, updateStep: (s) => update({ step: s }), reset });
+    useServiceURLSync({
+        step,
+        updateStep: (s) => update({ step: s }),
+        reset,
+        isValidStep: (s) => s < 2 || Boolean(phone && amount && provider),
+    });
 
     if (isMobile === null) return null;
 
