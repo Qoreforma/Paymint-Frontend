@@ -6,7 +6,7 @@ import {
   QualificationRuleType,
   IReferralListEntry,
 } from "@/lib/api/dashboard-apis/rewardsApis";
-import { Target, Users, Clock, TrendingUp, ChevronDown, ChevronUp, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Target, Users, Clock, TrendingUp, ChevronDown, ChevronUp, CheckCircle2, XCircle } from "lucide-react";
 
 const pendingLabel: Record<QualificationRuleType, string> = {
   "all-time-count": "",
@@ -65,7 +65,6 @@ const TierProgressCard: React.FC = () => {
 
   const isNewSinceClaim = ruleType === "new-since-last-claim";
 
-  const qualifyCount = referralList.filter((r) => r.qualifies).length;
   const disqualifyCount = referralList.filter((r) => !r.qualifies).length;
 
   return (

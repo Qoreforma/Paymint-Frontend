@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getReferralTerms, getReferralBonusRule, ReferralTerm, ReferralBonusRule } from "@/lib/api/dashboard-apis/referralsApis";
 import { User } from "@/context/AuthContext";
 import { formatAmount } from "@/lib/utils";
-import { Award, CheckCircle2, Gift, Sparkles, HelpCircle, ShieldCheck, Star, Coins } from "lucide-react";
+import { Award, CheckCircle2, Gift, Sparkles, HelpCircle, ShieldCheck, Coins } from "lucide-react";
 import DOMPurify from "dompurify";
 
 interface ReferralRulesCardProps {
