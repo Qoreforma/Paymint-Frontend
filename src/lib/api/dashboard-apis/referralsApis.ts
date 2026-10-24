@@ -92,6 +92,24 @@ export interface ReferralTerm {
   slug?: string;
 }
 
+export interface BonusRuleCard {
+  title: string;
+  description: string;
+}
+
+export interface ReferralBonusRule {
+  _id?: string;
+  amount: number;
+  reward: number;
+  isActive?: boolean;
+  one?: BonusRuleCard;
+  two?: BonusRuleCard;
+  three?: BonusRuleCard;
+  [key: string]: any;
+}
+
+
+
 export const getReferrals = async () => {
     const response = await api.get("/referrals");
     return response.data;
@@ -112,3 +130,12 @@ export const getReferralTerms = async (): Promise<ReferralTerm[]> => {
     const data = response.data?.data;
     return Array.isArray(data) ? data : data ? [data] : [];
 }   
+
+/**
+ * Returns the active referral bonus rule (amount, todo, reward).
+ * Used on the referral terms/rules card in the UI.
+ */
+export const getReferralBonusRule = async (): Promise<ReferralBonusRule | null> => {
+    const response = await api.get("/referrals/bonus-rule");
+    return response.data?.data ?? null;
+}

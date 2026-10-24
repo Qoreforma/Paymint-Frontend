@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   getUserTierProgress,
   TierProgressResponse,
   QualificationRuleType,
+  IReferralListEntry,
 } from "@/lib/api/dashboard-apis/rewardsApis";
-import { Target, Users, Clock, TrendingUp } from "lucide-react";
+import { Target, Users, Clock, TrendingUp, ChevronDown, ChevronUp, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 const pendingLabel: Record<QualificationRuleType, string> = {
   "all-time-count": "",
@@ -16,6 +17,8 @@ const pendingLabel: Record<QualificationRuleType, string> = {
 };
 
 const TierProgressCard: React.FC = () => {
+  const [showList, setShowList] = useState(false);
+
   const { data: progressData, isLoading } = useQuery<TierProgressResponse | null>({
     queryKey: ["tier-progress"],
     queryFn: getUserTierProgress,
@@ -38,7 +41,7 @@ const TierProgressCard: React.FC = () => {
 
   if (!progressData) return null;
 
-  const { currentTier, progress } = progressData;
+  const { currentTier, progress, referralList = [] } = progressData;
   const {
     totalReferrals,
     qualifyingReferrals,
@@ -61,6 +64,9 @@ const TierProgressCard: React.FC = () => {
     ruleType !== "new-since-last-claim";
 
   const isNewSinceClaim = ruleType === "new-since-last-claim";
+
+  const qualifyCount = referralList.filter((r) => r.qualifies).length;
+  const disqualifyCount = referralList.filter((r) => !r.qualifies).length;
 
   return (
     <div className="rounded-2xl border border-[#EAECF0] bg-white p-4 shadow-sm my-4">
@@ -110,7 +116,7 @@ const TierProgressCard: React.FC = () => {
         {showPending && (
           <StatChip
             icon={<Clock className="size-3.5 text-amber-500" />}
-            label={pendingLabel[ruleType] || "Pending"}
+            label={pendingLabel[ruleType as QualificationRuleType] || "Pending"}
             value={pendingReferrals}
           />
         )}
@@ -127,6 +133,114 @@ const TierProgressCard: React.FC = () => {
             to qualify
           </p>
         )}
+
+      {/* Referral list toggle */}
+      {referralList.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-[#F2F4F7]">
+          <button
+            type="button"
+            onClick={() => setShowList((v) => !v)}
+            className="flex items-center justify-between w-full text-xs font-medium text-[#344054] hover:text-[#2A52BE] transition-colors"
+          >
+            <span className="flex items-center gap-1.5">
+              <Users className="size-3.5" />
+              Your Referrals
+              {disqualifyCount > 0 && (
+                <span className="ml-1 text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-600 rounded-full">
+                  {disqualifyCount} not qualifying
+                </span>
+              )}
+            </span>
+            {showList ? (
+              <ChevronUp className="size-3.5 text-[#667085]" />
+            ) : (
+              <ChevronDown className="size-3.5 text-[#667085]" />
+            )}
+          </button>
+
+          {showList && (
+            <div className="mt-2 space-y-2 max-h-64 overflow-y-auto pr-0.5">
+              {referralList.map((entry) => (
+                <ReferralListRow key={entry.referralId} entry={entry} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ReferralListRow: React.FC<{ entry: IReferralListEntry }> = ({ entry }) => {
+  const initials = (entry.name || entry.username || entry.email || "?")
+    .charAt(0)
+    .toUpperCase();
+
+  const displayName =
+    entry.name ||
+    entry.username ||
+    (entry.email ? entry.email.split("@")[0] : "User");
+
+  const dateStr = entry.createdAt
+    ? new Date(entry.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "";
+
+  return (
+    <div className="flex items-center justify-between gap-3 py-1.5">
+      {/* Avatar + name */}
+      <div className="flex items-center gap-2.5">
+        {entry.avatar ? (
+          <img
+            src={entry.avatar}
+            alt={displayName}
+            className="size-8 rounded-full object-cover shrink-0"
+          />
+        ) : (
+          <div className="size-8 rounded-full bg-[#EEF2FF] text-[#2A52BE] font-bold text-xs flex items-center justify-center shrink-0">
+            {initials}
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-[#101828] truncate max-w-[120px]">
+            {displayName}
+          </p>
+          {entry.email && (
+            <p className="text-[10px] text-[#667085] truncate max-w-[120px]">
+              {entry.email}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Qualification badge + date */}
+      <div className="flex flex-col items-end shrink-0 gap-0.5">
+        {entry.qualifies ? (
+          <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+            <CheckCircle2 className="size-3" />
+            Qualifies
+          </span>
+        ) : (
+          <span
+            className="flex items-center gap-1 text-[10px] font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full cursor-help"
+            title={entry.disqualifyReason}
+          >
+            <XCircle className="size-3" />
+            Not qualifying
+          </span>
+        )}
+        {!entry.qualifies && entry.disqualifyReason && (
+          <p className="text-[9px] text-[#667085] max-w-[130px] text-right leading-tight">
+            {entry.disqualifyReason}
+          </p>
+        )}
+        {dateStr && (
+          <span className="text-[9px] text-[#98A2B3]">{dateStr}</span>
+        )}
+      </div>
     </div>
   );
 };

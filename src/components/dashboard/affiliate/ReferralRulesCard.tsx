@@ -1,9 +1,9 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getReferralTerms, ReferralTerm } from "@/lib/api/dashboard-apis/referralsApis";
+import { getReferralTerms, getReferralBonusRule, ReferralTerm, ReferralBonusRule } from "@/lib/api/dashboard-apis/referralsApis";
 import { User } from "@/context/AuthContext";
 import { formatAmount } from "@/lib/utils";
-import { Award, CheckCircle2, Gift, Sparkles, HelpCircle, ShieldCheck } from "lucide-react";
+import { Award, CheckCircle2, Gift, Sparkles, HelpCircle, ShieldCheck, Star, Coins } from "lucide-react";
 import DOMPurify from "dompurify";
 
 interface ReferralRulesCardProps {
@@ -19,6 +19,13 @@ export const ReferralRulesCard: React.FC<ReferralRulesCardProps> = ({ user }) =>
   const { data: terms, isLoading: loadingTerms } = useQuery<ReferralTerm[]>({
     queryKey: ["referral-terms"],
     queryFn: getReferralTerms,
+    staleTime: 1000 * 60 * 10,
+    enabled: !isInfluencer,
+  });
+
+  const { data: bonusRule } = useQuery<ReferralBonusRule | null>({
+    queryKey: ["referral-bonus-rule"],
+    queryFn: getReferralBonusRule,
     staleTime: 1000 * 60 * 10,
     enabled: !isInfluencer,
   });
@@ -153,6 +160,58 @@ export const ReferralRulesCard: React.FC<ReferralRulesCardProps> = ({ user }) =>
 
         {loadingTerms && (
           <div className="animate-pulse bg-slate-100 h-16 rounded-xl" />
+        )}
+
+        {/* Referral Bonus Rule Cards */}
+        {bonusRule && (
+          <div className="mt-3 space-y-2.5">
+            {[
+              bonusRule.one && { key: "one", ...bonusRule.one },
+              bonusRule.two && { key: "two", ...bonusRule.two },
+              bonusRule.three && { key: "three", ...bonusRule.three },
+            ]
+              .filter(Boolean)
+              .map((item: any, idx) => (
+                <div
+                  key={item.key || idx}
+                  className="rounded-xl border border-[#2A52BE]/20 bg-[#EEF2FF] p-3.5"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2.5">
+                      <div className="size-8 rounded-lg bg-[#2A52BE] flex items-center justify-center shrink-0">
+                        <Coins className="size-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-[#101828]">
+                          {item.title}
+                        </p>
+                        <p className="text-[11px] text-[#475467] mt-0.5 leading-relaxed">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
+                    {idx === 0 && (
+                      <div className="text-right shrink-0">
+                        <p className="text-xs text-[#667085]">Reward</p>
+                        <p className="text-sm font-bold text-[#2A52BE]">
+                          {formatAmount(bonusRule.reward)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {idx === 0 &&
+                    bonusRule.amount > 0 &&
+                    bonusRule.amount !== bonusRule.reward && (
+                      <div className="mt-2 pt-2 border-t border-[#2A52BE]/10 flex items-center justify-between">
+                        <span className="text-[11px] text-[#667085]">Bonus amount</span>
+                        <span className="text-[11px] font-semibold text-[#344054]">
+                          {formatAmount(bonusRule.amount)}
+                        </span>
+                      </div>
+                    )}
+                </div>
+              ))}
+          </div>
         )}
 
         {terms && terms.length > 0 && (

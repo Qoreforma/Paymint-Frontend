@@ -98,6 +98,18 @@ export interface QualificationRuleInfo {
   minTransactionValue?: number;
 }
 
+export interface IReferralListEntry {
+  referralId: string;
+  referredId: string;
+  username?: string;
+  name?: string;
+  email?: string;
+  avatar?: string;
+  createdAt: string;
+  qualifies: boolean;
+  disqualifyReason?: string;
+}
+
 export interface TierProgressResponse {
   currentTier: {
     tierId: string;
@@ -120,7 +132,10 @@ export interface TierProgressResponse {
     /** Total spin tickets earned on this tier (spun or un-spun) */
     totalSpinsEarned: number;
   };
+  /** Per-referral breakdown with qualification info and reason if disqualified */
+  referralList: IReferralListEntry[];
 }
+
 
 // ─── API Functions ────────────────────────────────────────────────────────────
 
